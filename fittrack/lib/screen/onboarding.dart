@@ -14,20 +14,21 @@ class OnboardingScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 245, 245, 245),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 28, 28, 29),
+        backgroundColor: const Color.fromARGB(255, 169, 168, 242),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'lib/assets/icons/logo.png',
-              width: 32,
-              height: 32,
-            ),
-            const SizedBox(width: 10),
+            Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Image.asset(
+                  'assets/icons/logo.png',
+                  height: 32,
+                )),
+            const SizedBox(width: 20),
             Text(
               'FitTrack',
               style: GoogleFonts.montserrat(
-                fontSize: 18,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -41,7 +42,7 @@ class OnboardingScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 32), // Margen bajo el AppBar
-              Image.asset('lib/assets/icons/inicioImage.png', height: 260),
+              Image.asset('assets/icons/inicioImage.png', height: 197),
               const SizedBox(height: 32),
               Align(
                 alignment: Alignment.centerLeft,
@@ -54,7 +55,8 @@ class OnboardingScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                     'Remodela tu cuerpo. Vive siempre en forma. Un estilo de vida saludable.',
-                    style: GoogleFonts.montserrat(fontSize: 14)),
+                    style: GoogleFonts.montserrat(
+                        fontSize: 16, fontWeight: FontWeight.w500)),
               ),
               const SizedBox(height: 28),
               Align(
