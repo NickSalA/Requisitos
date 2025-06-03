@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/Repos/Requisitos/Requisitos/fittrack/windows/flutter"
+    "cmake.sourceDirectory": "D:/Repos/Requisitos/Requisitos/fittrack/windows/flutter",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
