@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fittrack/screen/ejericicios_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,9 +32,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onButtonTap(String nombreBoton) {
+    if (nombreBoton == 'Ejercicio'){
+      Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const EjerciciosScreen()),
+      );
+    } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Has presionado $nombreBoton')),
     );
+    }
   }
 
   @override
