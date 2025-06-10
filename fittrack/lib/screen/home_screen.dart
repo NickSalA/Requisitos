@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:fittrack/screen/ejericicios_screen.dart';
+import 'package:fittrack/screen/yoga_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,18 +32,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onButtonTap(String nombreBoton) {
-    if (nombreBoton == 'Ejercicio'){
-      Navigator.push(
+void _onButtonTap(String nombreBoton) {
+  final boton = nombreBoton.trim().toLowerCase();
+
+  if (boton == 'ejercicio') {
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const EjerciciosScreen()),
-      );
-    } else {
+    );
+  } else if (boton == 'yoga') {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const YogaScreen()),
+    );
+  } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Has presionado $nombreBoton')),
     );
-    }
   }
+}
 
   @override
   Widget build(BuildContext context) {

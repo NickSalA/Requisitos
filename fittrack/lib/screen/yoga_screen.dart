@@ -1,59 +1,52 @@
+import 'package:fittrack/screen/yoga_detalles.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../model/ejercicio.dart';
-import 'ejercicios_detalles.dart'; 
-class EjerciciosScreen extends StatefulWidget {
-  const EjerciciosScreen({super.key});
+import '../model/yoga.dart';
+
+class YogaScreen extends StatefulWidget {
+  const YogaScreen({super.key});
 
   @override
-  State<EjerciciosScreen> createState() => _EjerciciosScreenState();
+  State<YogaScreen> createState() => _YogaScreenState();
 }
 
-class _EjerciciosScreenState extends State<EjerciciosScreen> {
-  final List<Ejercicio> _ejercicios = [
-    Ejercicio(
+class _YogaScreenState extends State<YogaScreen> {
+  final List<Yoga> _posesYoga = [
+    Yoga(
       id: 1,
-      nombre: 'Sentadilla',
-      descripcion: 'Ejercicio para piernas y glúteos',
-      imagenPath: 'assets/icons/sentadillas.png',
+      nombre: 'Postura de la cobra',
+      descripcion: 'Mejora el equilibrio y la concentración',
+      imagenPath: 'assets/icons/cobra.png',
       fechaCreacion: DateTime.now(),
-      tipo: 'Fuerza',
-      series: 3,
-      repeticiones: 12,
-      descanso: 30,
+      tipo: 'Equilibrio',
+      duracion: 30,
     ),
-    Ejercicio(
+    Yoga(
       id: 2,
-      nombre: 'Planchas',
-      descripcion: 'Ejercicio para core y abdomen',
-      imagenPath: 'assets/icons/planchas.png',
+      nombre: 'Postura del arbol',
+      descripcion: 'Estira la columna y fortalece brazos y piernas',
+      imagenPath: 'assets/icons/arbol.png',
       fechaCreacion: DateTime.now(),
-      tipo: 'Resistencia',
-      series: 3,
-      repeticiones: 1,
-      descanso: 30,
+      tipo: 'Flexibilidad',
+      duracion: 45,
     ),
-    Ejercicio(
+    Yoga(
       id: 3,
-      nombre: 'Curl de bíceps',
-      descripcion: 'Ejercicio para brazos',
-      imagenPath: 'assets/icons/curl de biceps.png',
+      nombre: 'Postura del guerrero',
+      descripcion: 'Fortalece piernas y mejora la resistencia',
+      imagenPath: 'assets/icons/guerrero.png',
       fechaCreacion: DateTime.now(),
       tipo: 'Fuerza',
-      series: 3,
-      repeticiones: 10,
-      descanso: 30,
+      duracion: 40,
     ),
-    Ejercicio(
+    Yoga(
       id: 4,
-      nombre: 'Laterales hombros',
-      descripcion: 'Ejercicio para hombros',
-      imagenPath: 'assets/icons/laterales hombros.png',
+      nombre: 'Postura del perro',
+      descripcion: 'Ideal para meditación y relajación',
+      imagenPath: 'assets/icons/downdog.png',
       fechaCreacion: DateTime.now(),
-      tipo: 'Fuerza',
-      series: 3,
-      repeticiones: 12,
-      descanso: 30,
+      tipo: 'Relajación',
+      duracion: 60,
     ),
   ];
 
@@ -103,7 +96,7 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
                         Image.asset('assets/icons/logo.png', width: 50, height: 50),
                         const SizedBox(height: 15),
                         Text(
-                          'Establece tu reto de hoy!',
+                          'Encuentra tu paz interior',
                           style: GoogleFonts.montserrat(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -127,8 +120,8 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
                           mainAxisSpacing: 15,
                           crossAxisSpacing: 15,
                           childAspectRatio: 1.0,
-                          children: _ejercicios.map((ejercicio) {
-                            return _buildExerciseCard(context, ejercicio);
+                          children: _posesYoga.map((pose) {
+                            return _buildYogaPoseCard(context, pose);
                           }).toList(),
                         ),
                         const SizedBox(height: 20),
@@ -136,7 +129,7 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
                           width: 340,
                           child: ElevatedButton(
                             onPressed: () {
-                              // Lógica para iniciar los ejercicios
+                              // Lógica para iniciar la sesión de yoga
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFA9A8F2),
@@ -146,7 +139,7 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
                               ),
                             ),
                             child: Text(
-                              '¡Iniciar!',
+                              '¡Comenzar sesión!',
                               style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -168,14 +161,14 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
     );
   }
 
-Widget _buildExerciseCard(BuildContext context, Ejercicio ejercicio) {
+  Widget _buildYogaPoseCard(BuildContext context,Yoga pose) {
     return ElevatedButton(
       onPressed: () {
         // Navegar a la nueva pantalla de detalles
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EjercicioDetailScreen(ejercicio: ejercicio),
+            builder: (context) => YogaDetailScreen(yoga: pose),
           ),
         );
       },
@@ -190,10 +183,10 @@ Widget _buildExerciseCard(BuildContext context, Ejercicio ejercicio) {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(ejercicio.imagenPath, width: 75, height: 75),
+          Image.asset(pose.imagenPath, width: 75, height: 75),
           const SizedBox(height: 10),
           Text(
-            ejercicio.nombre,
+            pose.nombre,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.bold,
               fontSize: 16,
