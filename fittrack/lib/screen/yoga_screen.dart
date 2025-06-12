@@ -2,6 +2,9 @@ import 'package:fittrack/screen/yoga_detalles.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/yoga.dart';
+import 'package:provider/provider.dart';
+import 'package:fittrack/screen/seleccion_yoga.dart';
+import '../modelView/yoga_provider.dart';
 
 class YogaScreen extends StatefulWidget {
   const YogaScreen({super.key});
@@ -14,7 +17,7 @@ class _YogaScreenState extends State<YogaScreen> {
   final List<Yoga> _posesYoga = [
     Yoga(
       id: 1,
-      nombre: 'Postura de la cobra',
+      nombre: 'Cobra',
       descripcion: 'Mejora el equilibrio y la concentración',
       imagenPath: 'assets/icons/cobra.png',
       fechaCreacion: DateTime.now(),
@@ -23,7 +26,7 @@ class _YogaScreenState extends State<YogaScreen> {
     ),
     Yoga(
       id: 2,
-      nombre: 'Postura del arbol',
+      nombre: 'Tree',
       descripcion: 'Estira la columna y fortalece brazos y piernas',
       imagenPath: 'assets/icons/arbol.png',
       fechaCreacion: DateTime.now(),
@@ -32,7 +35,7 @@ class _YogaScreenState extends State<YogaScreen> {
     ),
     Yoga(
       id: 3,
-      nombre: 'Postura del guerrero',
+      nombre: 'Warrior2',
       descripcion: 'Fortalece piernas y mejora la resistencia',
       imagenPath: 'assets/icons/guerrero.png',
       fechaCreacion: DateTime.now(),
@@ -41,7 +44,7 @@ class _YogaScreenState extends State<YogaScreen> {
     ),
     Yoga(
       id: 4,
-      nombre: 'Postura del perro',
+      nombre: 'Downdog',
       descripcion: 'Ideal para meditación y relajación',
       imagenPath: 'assets/icons/downdog.png',
       fechaCreacion: DateTime.now(),
@@ -52,6 +55,8 @@ class _YogaScreenState extends State<YogaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final selected = context.watch<YogaSessionViewModel>().selectedPose;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -64,94 +69,19 @@ class _YogaScreenState extends State<YogaScreen> {
       ),
       body: Stack(
         children: [
-          // Fondo morado superior
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 200,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFA9A8F2),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-              ),
-            ),
-          ),
-
-          // Contenido principal con scroll
+          _buildPurpleHeader(),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 30),
               child: Column(
                 children: [
                   const SizedBox(height: 10),
-                  // Encabezado
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        Image.asset('assets/icons/logo.png', width: 50, height: 50),
-                        const SizedBox(height: 15),
-                        Text(
-                          'Encuentra tu paz interior',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-
-                  // Contenido con Grid y botón
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Column(
-                      children: [
-                        GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(), // Evita scroll anidado
-                          mainAxisSpacing: 15,
-                          crossAxisSpacing: 15,
-                          childAspectRatio: 1.0,
-                          children: _posesYoga.map((pose) {
-                            return _buildYogaPoseCard(context, pose);
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: 340,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Lógica para iniciar la sesión de yoga
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFA9A8F2),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              '¡Comenzar sesión!',
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
+                  _buildTitle(),
+                  const SizedBox(height: 10),
+                  _buildGrid(context),
+                  const SizedBox(height: 20),
+                  _buildStartButton(context, selected),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -161,19 +91,72 @@ class _YogaScreenState extends State<YogaScreen> {
     );
   }
 
-  Widget _buildYogaPoseCard(BuildContext context,Yoga pose) {
+  Widget _buildPurpleHeader() => Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 200,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFA9A8F2),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
+        ),
+      );
+
+  Widget _buildTitle() => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          children: [
+            Image.asset('assets/icons/logo.png', width: 50, height: 50),
+            const SizedBox(height: 15),
+            Text(
+              'Encuentra tu paz interior',
+              style: GoogleFonts.montserrat(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+
+  Widget _buildGrid(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 15,
+          crossAxisSpacing: 15,
+          childAspectRatio: 1.0,
+          children: _posesYoga.map((pose) {
+            return _buildYogaPoseCard(context, pose);
+          }).toList(),
+        ),
+      );
+
+  Widget _buildYogaPoseCard(BuildContext context, Yoga pose) {
+    final isSelected =
+        context.watch<YogaSessionViewModel>().selectedPose?.id == pose.id;
+
     return ElevatedButton(
       onPressed: () {
-        // Navegar a la nueva pantalla de detalles
+        context.read<YogaSessionViewModel>().selectPose(pose);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => YogaDetailScreen(yoga: pose),
+            builder: (_) => YogaDetailScreen(yoga: pose),
           ),
         );
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
+        backgroundColor: isSelected ? const Color(0xFFD6D4F4) : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -197,4 +180,35 @@ class _YogaScreenState extends State<YogaScreen> {
       ),
     );
   }
+
+  Widget _buildStartButton(BuildContext context, Yoga? selected) => SizedBox(
+        width: 340,
+        child: ElevatedButton(
+          onPressed: selected != null
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SeleccionYogaScreen(),
+                    ),
+                  );
+                }
+              : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFA9A8F2),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            '¡Comenzar sesión!',
+            style: GoogleFonts.montserrat(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
 }

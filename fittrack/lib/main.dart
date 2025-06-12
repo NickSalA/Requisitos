@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'screen/splash_decider.dart';
+import 'modelView/yoga_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const FitTrackApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => YogaSessionViewModel()),
+  ], child: const FitTrackApp()));
 }
 
 class FitTrackApp extends StatelessWidget {
