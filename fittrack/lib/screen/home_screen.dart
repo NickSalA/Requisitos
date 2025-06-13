@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fittrack/screen/FAQ.dart';
 import 'package:fittrack/screen/ejericicios_screen.dart';
 import 'package:fittrack/screen/yoga_screen.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,13 @@ void _onButtonTap(String nombreBoton) {
       context,
       MaterialPageRoute(builder: (context) => const YogaScreen()),
     );
-  } else {
+  } else if (boton == 'faq'){
+    Navigator.push(
+      context,MaterialPageRoute(builder: (contex) => FAQ_screen()),
+    );
+
+  } 
+  else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Has presionado $nombreBoton')),
     );
