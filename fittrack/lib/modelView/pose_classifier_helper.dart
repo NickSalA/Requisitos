@@ -1,7 +1,6 @@
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:fittrack/model/inferer.dart';
 import 'package:flutter/services.dart';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:camera/camera.dart';
