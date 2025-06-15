@@ -2,6 +2,7 @@
 import 'dart:math';
 
 List<List<double>> normalizeKeypoints(List<List<double>> keypoints) {
+  // 1. Center: mover la pose al (0,0)
   final leftHip = keypoints[11];
   final rightHip = keypoints[12];
   final poseCenter = [
@@ -9,10 +10,12 @@ List<List<double>> normalizeKeypoints(List<List<double>> keypoints) {
     (leftHip[1] + rightHip[1]) / 2.0,
   ];
 
+  // Centrar todos los puntos
   List<List<double>> centered = keypoints
       .map((kpt) => [kpt[0] - poseCenter[0], kpt[1] - poseCenter[1]])
       .toList();
 
+  // 2. Scale: escalar la pose por el tamaño del torso
   final leftShoulder = keypoints[5];
   final rightShoulder = keypoints[6];
   final shouldersCenter = [
@@ -29,12 +32,14 @@ List<List<double>> normalizeKeypoints(List<List<double>> keypoints) {
   }
   final poseSize = max(torsoSize * torsoSizeMultiplier, maxDist);
 
+  // Normalizar todos los keypoints
   List<List<double>> normalized =
       centered.map((kpt) => [kpt[0] / poseSize, kpt[1] / poseSize]).toList();
 
   return normalized;
 }
 
+// Embedding plano para el clasificador (listado 34 valores: x1, y1, x2, y2, ... x17, y17)
 List<double> getEmbedding(List<List<double>> normalizedKeypoints) {
   return normalizedKeypoints.expand((xy) => xy).toList();
 }

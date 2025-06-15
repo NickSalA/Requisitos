@@ -1,4 +1,5 @@
-Cobra
-Downdog
-Tree
-Warrior2
+cobra
+dog
+no_pose
+tree
+warrior
