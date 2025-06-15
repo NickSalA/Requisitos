@@ -3,57 +3,41 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../modelView/yoga_provider.dart';
 import '../../modelView/sesion_yoga_screen.dart';
+import '../utils/keypoints_painter.dart';
 
-class SesionYogaScreen extends StatefulWidget {
+class SesionYogaScreen extends StatelessWidget {
   const SesionYogaScreen({super.key});
-  @override
-  State<SesionYogaScreen> createState() => _SesionYogaScreenState();
-}
-
-class _SesionYogaScreenState extends State<SesionYogaScreen> {
-  PoseSessionViewModel? _viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    _init();
-  }
-
-  Future<void> _init() async {
-    final cameras = await availableCameras();
-    final camera = cameras.firstWhere(
-      (c) => c.lensDirection == CameraLensDirection.front,
-      orElse: () => cameras.first,
-    );
-    // Si tienes el pose y tiempo en el Provider global, úsalo aquí:
-    final pose = context.read<YogaSessionViewModel>().selectedPose;
-    final tiempo = context.read<YogaSessionViewModel>().tiempoObjetivo;
-
-    final vm = PoseSessionViewModel();
-    await vm.initialize(camera, tiempo, pose?.nombre ?? '');
-    setState(() {
-      _viewModel = vm;
-    });
-  }
-
-  @override
-  void dispose() {
-    _viewModel?.finishSession();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    if (_viewModel == null ||
-        !_viewModel!.cameraController.value.isInitialized) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    final pose = context.watch<YogaSessionViewModel>().selectedPose;
+    final tiempoObjetivo = context.watch<YogaSessionViewModel>().tiempoObjetivo;
 
-    return ChangeNotifierProvider.value(
-      value: _viewModel!,
-      child: const _SesionYogaView(),
+    return FutureBuilder<List<CameraDescription>>(
+      future: availableCameras(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Usa la cámara frontal si existe, si no la trasera
+        final camera = snapshot.data!.firstWhere(
+          (c) => c.lensDirection == CameraLensDirection.front,
+          orElse: () => snapshot.data!.first,
+        );
+
+        return ChangeNotifierProvider(
+          create: (_) => PoseSessionViewModel()
+            ..initialize(
+              camera,
+              tiempoObjetivo,
+              pose?.nombre ?? '',
+            ),
+          child: const _SesionYogaView(),
+        );
+      },
     );
   }
 }
@@ -66,84 +50,104 @@ class _SesionYogaView extends StatelessWidget {
     final vm = context.watch<PoseSessionViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Yoga")),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: const Color(0xFFA9A8F2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Cronómetro: ${vm.sessionStarted ? vm.countdown : 'XX'}",
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      vm.isPoseCorrect ? "¡Vas bien!" : "Corrige la postura",
-                      style: TextStyle(
-                        color:
-                            vm.isPoseCorrect ? Colors.white : Colors.red[100],
-                        fontWeight: FontWeight.bold,
-                      ),
+      appBar: AppBar(
+        title: const Text("Yoga"),
+        backgroundColor: const Color(0xFFA9A8F2),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Feedback y cronómetro, solo la info relevante
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFA9A8F2),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Cronómetro
+                  Text(
+                    "Cronómetro: ${vm.sessionStarted ? vm.countdown : 'XX'}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    if (!vm.isPoseCorrect && vm.feedback != null)
+                  ),
+                  // Feedback
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
                       Text(
-                        vm.feedback!,
-                        style: const TextStyle(
-                            color: Colors.yellowAccent, fontSize: 14),
+                        vm.isPoseCorrect ? "¡Vas bien!" : "Corrige la postura",
+                        style: TextStyle(
+                          color:
+                              vm.isPoseCorrect ? Colors.white : Colors.red[100],
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    // DEBUG log:
-                    if (vm.keypoints != null)
-                      Text(
-                        'DEBUG: KP ${vm.keypoints!.length} - ${vm.currentPose ?? "?"} (${(vm.confidence ?? 0.0).toStringAsFixed(2)})',
-                        style: const TextStyle(
-                            fontSize: 12, color: Colors.deepPurple),
-                      ),
-                  ],
-                )
-              ],
+                      if (!vm.isPoseCorrect && vm.feedback != null)
+                        Text(
+                          vm.feedback!,
+                          style: const TextStyle(
+                            color: Colors.yellowAccent,
+                            fontSize: 14,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: vm.cameraController.value.isInitialized
-                ? Stack(
+
+            // Cámara + keypoints (ocupa todo el espacio disponible)
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  if (!vm.cameraController.value.isInitialized) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  final previewSize = vm.cameraController.value.previewSize;
+                  return Stack(
                     fit: StackFit.expand,
                     children: [
                       CameraPreview(vm.cameraController),
-                      if (vm.keypoints != null)
+                      if (vm.keypoints != null && previewSize != null)
                         CustomPaint(
-                          painter: KeypointsPainter(vm.keypoints!,
-                              vm.cameraController.value.previewSize),
+                          painter: KeypointsPainter(
+                            vm.keypoints!,
+                            previewSize,
+                          ),
                           size: Size.infinite,
                         ),
                     ],
-                  )
-                : const Center(child: CircularProgressIndicator()),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: vm.finishSession,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFA9A8F2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  );
+                },
+              ),
+            ),
+
+            // Botón finalizar (siempre visible)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: vm.finishSession,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFA9A8F2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  "Finalizar",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  child: const Text(
+                    "Finalizar",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

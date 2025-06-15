@@ -58,7 +58,7 @@ class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
             children: [
               // Header morado con icono
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFFA9A8F2),
                   borderRadius: BorderRadius.circular(12),
@@ -83,7 +83,7 @@ class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(

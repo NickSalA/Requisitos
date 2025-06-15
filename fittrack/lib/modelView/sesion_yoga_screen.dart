@@ -1,145 +1,119 @@
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'pose_classifier_helper.dart';
+import 'package:image/image.dart' as image_lib;
+import '../utils/image_utils.dart'; // <-- La clase que mostraste
+import '../utils/normalize_keypoints.dart'; // <-- Normalización + embedding
+import '../model/movenet_helper.dart';
+import '../model/pose_helper.dart';
+import '../model/pose_pipeline_helper.dart';
 
 class PoseSessionViewModel extends ChangeNotifier {
   late CameraController _cameraController;
-  late PoseClassifierHelper _classifierHelper;
+  late MoveNetHelper movenetHelper;
+  late PoseClassifierHelper poseClassifierHelper;
 
-  int _countdown = 0;
-  int _stablePoseSeconds = 0;
+  final int _countdown = 0;
   bool _poseCorrect = false;
-  bool _sessionStarted = false;
+  final bool _sessionStarted = false;
   bool _sessionFinished = false;
   String? _currentPose;
+  int? _currentPoseIdx;
   double? _confidence;
   String? _feedback;
-  List<dynamic>? _keypoints;
+  List<List<double>>? _keypoints;
 
-  late Timer _mainTimer;
-  late Timer _poseValidationTimer;
+  bool _processing = false;
 
+  // ---- Getters para la UI ----
   CameraController get cameraController => _cameraController;
   bool get isPoseCorrect => _poseCorrect;
   int get countdown => _countdown;
-  List<dynamic>? get keypoints => _keypoints;
   bool get sessionStarted => _sessionStarted;
   bool get sessionFinished => _sessionFinished;
   String? get currentPose => _currentPose;
   double? get confidence => _confidence;
   String? get feedback => _feedback;
-
+  List<List<double>>? get keypoints => _keypoints;
+  late PosePipelineHelper posePipelineHelper;
+  // Mapea el índice a nombre de la pose (ajusta con tus labels reales)
+  final List<String> poseLabels = ["Cobra", "Downdog", "Tree", "Warrior2"];
   Future<void> initialize(
       CameraDescription camera, int tiempoObjetivo, String expectedPose) async {
+    _pipelineHelper = PosePipelineHelper(
+      moveNet: await Interpreter.fromAsset('assets/model/movenet.tflite'),
+      poseClassifier:
+          await Interpreter.fromAsset('assets/model/pose_classifier.tflite'),
+    );
     _cameraController = CameraController(camera, ResolutionPreset.low);
     await _cameraController.initialize();
 
-    _classifierHelper = PoseClassifierHelper();
-    await _classifierHelper.init();
+    movenetHelper = MoveNetHelper();
+    poseClassifierHelper = PoseClassifierHelper();
+    await movenetHelper.init();
+    await poseClassifierHelper.init();
 
-    bool processing = false;
-
-    await _cameraController.startImageStream((image) async {
-      if (processing) return; // Evita concurrencia
-      processing = true;
+    // Comienza el stream de la cámara
+    await _cameraController.startImageStream((CameraImage image) async {
+      if (_processing) return;
+      _processing = true;
       try {
-        final result = await _classifierHelper.inferFromCamera(image);
-
-        _currentPose = result['posture'] as String?;
-        _confidence = result['confidence'] as double?;
-        _feedback = result['feedbackParteMal'] as String?;
-        _keypoints = result['keypoints'] as List<dynamic>?;
-
-        print('Frame recibido:');
-        print(
-            ' - Pose detectada: $_currentPose (${_confidence?.toStringAsFixed(2)})');
-        print('Keypoints: ${_keypoints?.length}');
-        print('Feedback: $_feedback');
-
-        final bool correct = _currentPose != null &&
-            _currentPose!.toLowerCase().contains(expectedPose.toLowerCase());
-
-        if (!_sessionStarted) {
-          if (correct) {
-            _stablePoseSeconds++;
-            if (_stablePoseSeconds >= 2) {
-              _startMainTimer(tiempoObjetivo);
-            }
-          } else {
-            _stablePoseSeconds = 0;
-          }
+        final img = ImageUtils.convertCameraImage(image);
+        if (img == null) {
+          _processing = false;
+          return;
         }
-        _poseCorrect = correct;
+
+        // ---- MoveNet: obtiene keypoints ----
+        final keypoints = movenetHelper.infer(img); // [ [x, y, score], ... ]
+        _keypoints = keypoints;
+
+        // ---- Normalización ----
+        final normalized = normalizeKeypoints(keypoints);
+        final embedding = getEmbedding(normalized);
+
+        // ---- Clasificación de la pose ----
+        final poseIdx = poseClassifierHelper.classify(embedding);
+        _currentPoseIdx = poseIdx;
+        _currentPose = poseLabels[poseIdx]; // O tus propios nombres
+
+        // ---- (Opcional) Obtener "confianza" si tu modelo lo permite ----
+        // double? conf = ... // según tu modelo de clasificación
+
+        // ---- Feedback personalizado: ajusta con tu lógica ----
+        // Aquí puedes detectar si la pose es la esperada
+        final expectedIdx = poseLabels.indexWhere(
+            (label) => label.toLowerCase() == expectedPose.toLowerCase());
+
+        _poseCorrect = poseIdx == expectedIdx;
+
+        // Feedback básico: muestra nombre de la pose detectada y si es correcta
+        _feedback = _poseCorrect ? "¡Perfecto!" : "Corrige la postura";
+
         notifyListeners();
       } catch (e) {
-        debugPrint('Error al procesar la imagen: $e');
+        debugPrint('Error al procesar frame: $e');
       } finally {
-        processing = false;
+        _processing = false;
       }
     });
   }
 
-  void _startMainTimer(int duration) {
-    _sessionStarted = true;
-    _countdown = duration;
-
-    _mainTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!_poseCorrect) return;
-
-      _countdown--;
-      notifyListeners();
-
-      if (_countdown <= 0) {
-        finishSession();
-      }
-    });
-  }
+  // ---- Métodos para control de sesión (puedes ajustar según tu lógica de yoga) ----
 
   void finishSession() {
-    _poseValidationTimer.cancel();
-    if (_sessionStarted) _mainTimer.cancel();
     _cameraController.dispose();
-    _classifierHelper.close();
+    movenetHelper.close();
+    poseClassifierHelper.close();
     _sessionFinished = true;
     notifyListeners();
   }
 
   @override
   void dispose() {
-    _poseValidationTimer.cancel();
-    if (_sessionStarted) _mainTimer.cancel();
     _cameraController.dispose();
-    _classifierHelper.close();
+    movenetHelper.close();
+    poseClassifierHelper.close();
     super.dispose();
   }
-}
-
-class KeypointsPainter extends CustomPainter {
-  final List<dynamic> keypoints;
-  final Size? previewSize;
-
-  KeypointsPainter(this.keypoints, this.previewSize);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (previewSize == null) return;
-
-    final double scaleX = size.width / previewSize!.height;
-    final double scaleY = size.height / previewSize!.width;
-
-    final Paint dotPaint = Paint()
-      ..color = Colors.cyanAccent
-      ..strokeWidth = 6.0
-      ..style = PaintingStyle.fill;
-
-    for (final k in keypoints) {
-      final dx = k[0] * scaleX;
-      final dy = k[1] * scaleY;
-      canvas.drawCircle(Offset(dx, dy), 6, dotPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
