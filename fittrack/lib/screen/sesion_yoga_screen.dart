@@ -43,7 +43,7 @@ class SesionYogaScreen extends StatelessWidget {
 }
 
 class _SesionYogaView extends StatelessWidget {
-  const _SesionYogaView({super.key});
+  const _SesionYogaView();
 
   @override
   Widget build(BuildContext context) {
