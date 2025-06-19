@@ -44,18 +44,15 @@ class PosePipelineHelper {
 
   /// Procesa un frame de cámara, devuelve keypoints, clase, confianza y feedback
   Future<PoseClassificationResult> classifyFromCamera(CameraImage image) async {
-    debugPrint('🚦 Pipeline: inicio de procesamiento');
     if (!_initialized) throw Exception('Pipeline no inicializado');
 
     // 1. Convertir CameraImage a imagen RGB (usa tu propio ImageUtils si prefieres)
     img.Image? rgbImage = _convertCameraImageToImage(image);
-    debugPrint('🎨 Imagen convertida a RGB: ${rgbImage != null}');
     if (rgbImage == null) throw Exception('No se pudo convertir la imagen');
 
     // 2. Resize a 256x256 (Thunder) o 192x192 (Lightning), según el modelo
     img.Image inputMovenet = img.copyResize(rgbImage, width: 192, height: 192);
-    debugPrint('📦 Preparando input para MoveNet');
-    // 3. Prepara input para Movenet (uint8 [1,256,256,3])
+    // 3. Prepara input para Movenet (uint8 [1,192,192,3])
     var movenetInput = List.generate(
         1,
         (_) => List.generate(
@@ -76,22 +73,21 @@ class PosePipelineHelper {
     // 5. Extraer keypoints [17][3]
     final keypoints = List<List<double>>.generate(
         17, (i) => List<double>.from(keypointsOutput[0][0][i]));
-    debugPrint('📍 Keypoints extraidos: $keypoints');
-
     // 6. Normalizar keypoints (usa tu normalizador propio)
     final normalized = normalizeKeypoints(keypoints);
-    debugPrint('🔄 Keypoints normalizados: $normalized');
     // 7. Input para pose_classifier ([1, 34] si es 17 puntos x 2)
     final classifierInput = [
       normalized.expand((k) => [k[0], k[1]]).toList()
     ];
-    debugPrint('📊 Input para clasificador: $classifierInput');
     // 8. Output tensor ([1, num_classes])
     var classifierOutput =
         List.generate(1, (_) => List.filled(_classNames.length, 0.0));
 
     _classifier.run(classifierInput, classifierOutput);
     debugPrint('✅ Clasificador ejecutado');
+    debugPrint('Salida classifierOutput: $classifierOutput');
+    debugPrint(
+        'Clases: ${_classNames.length}, Output: ${classifierOutput[0].length}');
     // 9. Obtener predicción final
     final scores = classifierOutput[0];
     int maxIdx = 0;
@@ -108,14 +104,29 @@ class PosePipelineHelper {
 
     // 10. Feedback (opcional)
     String? feedback;
-    // Puedes poner reglas de feedback aquí, ej:
-    // if (normalized[5][1] < normalized[7][1]) feedback = 'Brazo izquierdo bajo';
-    if (clase.toLowerCase().contains('Cobra')) {
+    if (normalized.length < 13) {
+      feedback =
+          "Por favor, ajusta la cámara para que tu cuerpo entero sea visible.";
+    } else if (clase.toLowerCase().contains('cobra')) {
       feedback = '¡Buena postura de Cobra!';
-    } else if (clase.toLowerCase().contains('Tree')) {
+      // Feedbacks específicos para Cobra
+      if (normalized[5][1] < normalized[7][1]) {
+        feedback += ' Asegúrate de que ambos brazos estén alineados.';
+      } else if (normalized[5][1] > normalized[7][1]) {
+        feedback += ' Alinea tus brazos correctamente.';
+      }
+    } else if (clase.toLowerCase().contains('tree')) {
       feedback = 'Mantén el equilibrio en el Árbol.';
-    } else if (clase.toLowerCase().contains('Warrior2')) {
+      // Aquí podrías poner más reglas si lo deseas
+    } else if (clase.toLowerCase().contains('warrior')) {
       feedback = 'Excelente postura de Guerrero.';
+      // Más reglas específicas para Warrior si lo deseas
+    } else if (clase.toLowerCase().contains('dog')) {
+      feedback = 'Excelente postura de Down Dog.';
+    } else if (normalized[5][1] > normalized[7][1]) {
+      feedback = 'Alinea tus brazos correctamente.';
+    } else if (normalized[11][1] < normalized[12][1]) {
+      feedback = 'Alinea tus rodillas y caderas.';
     } else if (normalized[5][1] < normalized[7][1]) {
       feedback = 'Asegúrate de que ambos brazos estén alineados.';
     } else if (normalized[11][1] > normalized[12][1]) {
@@ -140,8 +151,10 @@ class PosePipelineHelper {
   }
 
   void dispose() {
-    _movenet.close();
-    _classifier.close();
+    if (_initialized) {
+      _movenet.close();
+      _classifier.close();
+    }
   }
 }
 

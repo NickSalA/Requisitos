@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import '../model/pose_pipeline_helper.dart'; // Cambia el import a donde tengas tu pipeline
+import '../model/pipeline.dart'; // Cambia el import a donde tengas tu pipeline
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
@@ -73,7 +73,8 @@ class PoseSessionViewModel extends ChangeNotifier {
       Future(() async {
         debugPrint('🔥 Recibido frame de cámara');
         try {
-          final result = await _pipeline.classifyFromCamera(image);
+          final result =
+              await _pipeline.classifyFromCamera(image, expectedPose);
           debugPrint(
               '🔎 Resultado del pipeline: ${result.clase}, conf=${result.confianza}');
           _keypoints = result.keypoints;

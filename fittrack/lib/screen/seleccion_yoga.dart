@@ -88,7 +88,7 @@ class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Tiempo:",
-                  style: GoogleFonts.poppins(fontSize: 16),
+                  style: GoogleFonts.montserrat(fontSize: 16),
                 ),
               ),
               const SizedBox(height: 8),
