@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../model/pipeline.dart'; // Cambia el import a donde tengas tu pipeline
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:fittrack/model/yoga.dart';
+import 'package:fittrack/repository/yoga_repositorio.dart';
 
 class PoseSessionViewModel extends ChangeNotifier {
   late CameraController _cameraController;
@@ -14,11 +16,17 @@ class PoseSessionViewModel extends ChangeNotifier {
   bool _poseCorrect = false;
   bool _sessionStarted = false;
   bool _sessionFinished = false;
+  late String _poseName;
+  late String _imagenPath;
   String? _feedback;
   List<List<double>>? _keypoints;
   Timer? _mainTimer;
   Timer? _poseValidationTimer;
+  int _tiempoCorrecto = 0;
+  int _tiempoIncorrecto = 0;
 
+  int get tiempoCorrecto => _tiempoCorrecto;
+  int get tiempoIncorrecto => _tiempoIncorrecto;
   CameraController get cameraController => _cameraController;
   bool get isPoseCorrect => _poseCorrect;
   int get countdown => _countdown;
@@ -27,15 +35,6 @@ class PoseSessionViewModel extends ChangeNotifier {
   String? get feedback => _feedback;
   List<List<double>>? get keypoints => _keypoints;
   bool _isProcessing = false;
-
-  void finishSession() {
-    _poseValidationTimer?.cancel();
-    _mainTimer?.cancel();
-    _cameraController.dispose();
-    _pipeline.dispose();
-    _sessionFinished = true;
-    notifyListeners();
-  }
 
   void _startMainTimer(int duration) {
     _sessionStarted = true;
@@ -54,7 +53,10 @@ class PoseSessionViewModel extends ChangeNotifier {
     CameraDescription camera,
     int tiempoObjetivo,
     String expectedPose,
+    String imagePath,
   ) async {
+    _poseName = expectedPose;
+    _imagenPath = imagePath;
     _cameraController = CameraController(camera, ResolutionPreset.low,
         enableAudio: false,
         imageFormatGroup: Platform.isIOS
@@ -90,6 +92,13 @@ class PoseSessionViewModel extends ChangeNotifier {
               }
             } else {
               _stablePoseSeconds = 0;
+              _tiempoCorrecto++;
+            }
+          } else {
+            if (correct) {
+              _tiempoCorrecto++;
+            } else {
+              _tiempoIncorrecto++;
             }
           }
           _poseCorrect = correct;
@@ -100,6 +109,36 @@ class PoseSessionViewModel extends ChangeNotifier {
         _isProcessing = false;
       });
     });
+  }
+
+  void finishSession() {
+    _poseValidationTimer?.cancel();
+    _mainTimer?.cancel();
+    _cameraController.dispose();
+    _pipeline.dispose();
+    _sessionFinished = true;
+    notifyListeners();
+
+    final resumen = Yoga(
+      id: DateTime.now().millisecondsSinceEpoch,
+      nombre: _poseName,
+      descripcion: 'Sesión de postura de $_poseName',
+      imagenPath: _imagenPath, // opcional
+      tipo: 'yoga',
+      duracion: _tiempoCorrecto + _tiempoIncorrecto,
+      duractionCorrecta: _tiempoCorrecto,
+      duracionIncorrecta: _tiempoIncorrecto,
+      fechaCreacion: DateTime.now(),
+    );
+
+    _guardarEnHistorial(resumen);
+  }
+
+  Future<void> _guardarEnHistorial(Yoga yoga) async {
+    final repo = YogaRepository();
+    final actual = await repo.fetchYoga();
+    actual.add(yoga);
+    await repo.saveYoga(actual);
   }
 
   @override

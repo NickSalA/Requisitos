@@ -2,6 +2,8 @@ import 'reto.dart';
 
 class Yoga extends Reto {
   int duracion;
+  int duractionCorrecta;
+  int duracionIncorrecta;
   Yoga({
     required int id,
     required String nombre,
@@ -9,6 +11,8 @@ class Yoga extends Reto {
     required String imagenPath,
     required String tipo,
     required this.duracion,
+    required this.duractionCorrecta,
+    required this.duracionIncorrecta,
     required DateTime fechaCreacion,
   }) : super(
           id,
@@ -32,6 +36,8 @@ class Yoga extends Reto {
       'imageUrl': imagenPath,
       'type': tipo,
       'duration': duracion,
+      'duractionCorrecta': duractionCorrecta,
+      'duracionIncorrecta': duracionIncorrecta,
       'fechaCreacion': fechaCreacion.toIso8601String(),
     };
   }
@@ -49,6 +55,8 @@ class Yoga extends Reto {
       imagenPath: json['imagenPath'],
       tipo: json['tipo'],
       duracion: json['duracion'],
+      duractionCorrecta: json['duractionCorrecta'],
+      duracionIncorrecta: json['duracionIncorrecta'],
       fechaCreacion: DateTime.parse(json['fechaCreacion']),
     );
   }

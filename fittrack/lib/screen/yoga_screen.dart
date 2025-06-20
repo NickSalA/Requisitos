@@ -23,6 +23,8 @@ class _YogaScreenState extends State<YogaScreen> {
       fechaCreacion: DateTime.now(),
       tipo: 'cobra',
       duracion: 30,
+      duractionCorrecta: 20,
+      duracionIncorrecta: 10,
     ),
     Yoga(
       id: 2,
@@ -32,6 +34,8 @@ class _YogaScreenState extends State<YogaScreen> {
       fechaCreacion: DateTime.now(),
       tipo: 'tree',
       duracion: 45,
+      duractionCorrecta: 30,
+      duracionIncorrecta: 15,
     ),
     Yoga(
       id: 3,
@@ -41,6 +45,8 @@ class _YogaScreenState extends State<YogaScreen> {
       fechaCreacion: DateTime.now(),
       tipo: 'warrior',
       duracion: 40,
+      duractionCorrecta: 25,
+      duracionIncorrecta: 15,
     ),
     Yoga(
       id: 4,
@@ -50,6 +56,8 @@ class _YogaScreenState extends State<YogaScreen> {
       fechaCreacion: DateTime.now(),
       tipo: 'dog',
       duracion: 60,
+      duractionCorrecta: 40,
+      duracionIncorrecta: 20,
     ),
   ];
 
