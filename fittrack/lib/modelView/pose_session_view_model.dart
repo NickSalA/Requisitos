@@ -16,15 +16,17 @@ class PoseSessionViewModel extends ChangeNotifier {
   bool _poseCorrect = false;
   bool _sessionStarted = false;
   bool _sessionFinished = false;
+  Yoga? _resumen;
   late String _poseName;
   late String _imagenPath;
   String? _feedback;
   List<List<double>>? _keypoints;
   Timer? _mainTimer;
   Timer? _poseValidationTimer;
+  Timer? _tiempoTimer;
   int _tiempoCorrecto = 0;
   int _tiempoIncorrecto = 0;
-
+  Yoga? get resumen => _resumen;
   int get tiempoCorrecto => _tiempoCorrecto;
   int get tiempoIncorrecto => _tiempoIncorrecto;
   CameraController get cameraController => _cameraController;
@@ -45,6 +47,13 @@ class PoseSessionViewModel extends ChangeNotifier {
       notifyListeners();
       if (_countdown <= 0) {
         finishSession();
+      }
+    });
+    _tiempoTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_poseCorrect) {
+        _tiempoCorrecto++;
+      } else {
+        _tiempoIncorrecto++;
       }
     });
   }
@@ -73,12 +82,11 @@ class PoseSessionViewModel extends ChangeNotifier {
       _isProcessing = true;
 
       Future(() async {
-        debugPrint('🔥 Recibido frame de cámara');
         try {
           final result =
               await _pipeline.classifyFromCamera(image, expectedPose);
-          debugPrint(
-              '🔎 Resultado del pipeline: ${result.clase}, conf=${result.confianza}');
+          // debugPrint(
+          // '🔎 Resultado del pipeline: ${result.clase}, conf=${result.confianza}');
           _keypoints = result.keypoints;
           _feedback = result.feedback;
 
@@ -92,13 +100,6 @@ class PoseSessionViewModel extends ChangeNotifier {
               }
             } else {
               _stablePoseSeconds = 0;
-              _tiempoCorrecto++;
-            }
-          } else {
-            if (correct) {
-              _tiempoCorrecto++;
-            } else {
-              _tiempoIncorrecto++;
             }
           }
           _poseCorrect = correct;
@@ -111,19 +112,16 @@ class PoseSessionViewModel extends ChangeNotifier {
     });
   }
 
-  void finishSession() {
+  Future<void> finishSession() async {
     _poseValidationTimer?.cancel();
     _mainTimer?.cancel();
-    _cameraController.dispose();
-    _pipeline.dispose();
     _sessionFinished = true;
-    notifyListeners();
 
-    final resumen = Yoga(
+    _resumen = Yoga(
       id: DateTime.now().millisecondsSinceEpoch,
       nombre: _poseName,
       descripcion: 'Sesión de postura de $_poseName',
-      imagenPath: _imagenPath, // opcional
+      imagenPath: _imagenPath,
       tipo: 'yoga',
       duracion: _tiempoCorrecto + _tiempoIncorrecto,
       duractionCorrecta: _tiempoCorrecto,
@@ -131,7 +129,8 @@ class PoseSessionViewModel extends ChangeNotifier {
       fechaCreacion: DateTime.now(),
     );
 
-    _guardarEnHistorial(resumen);
+    await _guardarEnHistorial(_resumen!);
+    notifyListeners();
   }
 
   Future<void> _guardarEnHistorial(Yoga yoga) async {

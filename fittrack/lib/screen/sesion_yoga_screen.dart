@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../modelView/yoga_provider.dart';
 import '../modelView/pose_session_view_model.dart';
 import '../utils/keypoints_painter.dart';
+import 'package:fittrack/screen/yoga_resultados.dart';
 
 class SesionYogaScreen extends StatelessWidget {
   const SesionYogaScreen({super.key});
@@ -49,7 +50,24 @@ class _SesionYogaView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<PoseSessionViewModel>();
+    if (vm.sessionFinished && vm.resumen != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final yoga = vm.resumen!;
 
+        // Navega y luego libera VM al volver
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => ResumenSesionScreen(yoga: yoga),
+          ),
+        );
+        if (vm.cameraController.value.isStreamingImages) {
+          await vm.cameraController.stopImageStream();
+        }
+        await vm.cameraController.dispose();
+        // IMPORTANTE: liberar recursos luego
+        vm.dispose();
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Yoga"),
