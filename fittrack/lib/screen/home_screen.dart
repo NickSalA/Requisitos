@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:fittrack/screen/FAQ.dart';
 import 'package:fittrack/screen/ejericicios_screen.dart';
+import 'package:fittrack/screen/historial_screen.dart';
 import 'package:fittrack/screen/yoga_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -51,7 +52,11 @@ void _onButtonTap(String nombreBoton) {
       context,MaterialPageRoute(builder: (contex) => FAQ_screen()),
     );
 
-  } 
+  } else if (boton == 'historial'){
+    Navigator.push(
+      context,MaterialPageRoute(builder: (contex) => HistorialScreen()),
+    );
+  }
   else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Has presionado $nombreBoton')),

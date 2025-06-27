@@ -31,11 +31,11 @@ class Yoga extends Reto {
     /// @returns: [Map<String, dynamic>]: Mapa JSON que representa el objeto Yoga.
     return {
       'id': id,
-      'name': nombre,
-      'description': descripcion,
-      'imageUrl': imagenPath,
-      'type': tipo,
-      'duration': duracion,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'imagenPath': imagenPath,
+      'tipo': tipo,
+      'duracion': duracion,
       'duractionCorrecta': duractionCorrecta,
       'duracionIncorrecta': duracionIncorrecta,
       'fechaCreacion': fechaCreacion.toIso8601String(),
