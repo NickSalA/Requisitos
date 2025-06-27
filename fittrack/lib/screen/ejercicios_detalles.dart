@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../model/ejercicio.dart';
+import '../modelView/ejercicio_session_view_model.dart';
+import '../screen/ejercicio_sesion_screen.dart';
 
 class EjercicioDetailScreen extends StatefulWidget {
   final Ejercicio ejercicio;
@@ -64,7 +67,7 @@ class _EjercicioDetailScreenState extends State<EjercicioDetailScreen> {
             const SizedBox(height: 20),
             _buildInputField("Repeticiones:", _repeticionesController),
             const SizedBox(height: 20),
-            _buildInputField("Descanso (minutos):", _descansoController),
+            _buildInputField("Descanso (segundos):", _descansoController),
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
@@ -72,26 +75,39 @@ class _EjercicioDetailScreenState extends State<EjercicioDetailScreen> {
                 final repeticiones = _repeticionesController.text;
                 final descanso = _descansoController.text;
 
-                if (series.isEmpty ||
-                    repeticiones.isEmpty ||
-                    descanso.isEmpty) {
+                if (series.isEmpty || repeticiones.isEmpty || descanso.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text("Por favor, completa todos los campos.")),
                   );
                   return;
                 }
+
+                final seriesNum = int.tryParse(series) ?? 1;
+                final repeticionesNum = int.tryParse(repeticiones) ?? 1;
+                final descansoNum = int.tryParse(descanso) ?? 30;
+
                 setState(() {
-                  widget.ejercicio.series =
-                      int.tryParse(series) ?? widget.ejercicio.series;
-                  widget.ejercicio.repeticiones = int.tryParse(repeticiones) ??
-                      widget.ejercicio.repeticiones;
-                  widget.ejercicio.descanso =
-                      int.tryParse(descanso) ?? widget.ejercicio.descanso;
+                  widget.ejercicio.series = seriesNum;
+                  widget.ejercicio.repeticiones = repeticionesNum;
+                  widget.ejercicio.descanso = descansoNum;
                 });
-                print(
-                    "Series: $series, Repeticiones: $repeticiones, Descanso: $descanso");
-                Navigator.pop(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (_) => EjercicioSessionViewModel(
+                        repeticionesPorSerie: repeticionesNum,
+                        totalSeries: seriesNum,
+                        descansoSegundos: descansoNum,
+                      ),
+                      child: EjercicioSesionScreen(
+                        nombreEjercicio: widget.ejercicio.nombre,
+                      ),
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFA9A8F2),
@@ -134,7 +150,7 @@ class _EjercicioDetailScreenState extends State<EjercicioDetailScreen> {
             filled: true,
             fillColor: const Color(0xFFF0F0F0),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
