@@ -1,8 +1,8 @@
-import 'dart:math';
+import 'dart:collection';
 
-import 'package:flutter/material.dart';
+import 'package:fittrack/utils/pose_math.dart';
 
-// Mapea índices de los keypoints de MoveNet
+/// Índices que entrega MoveNet
 enum Keypoint {
   nose,
   leftEye,
@@ -23,56 +23,58 @@ enum Keypoint {
   rightAnkle,
 }
 
-// Distancia euclídea
-double dist(List<double> a, List<double> b) =>
-    sqrt(pow(a[0] - b[0], 2) + pow(a[1] - b[1], 2));
+final _ankleOK = SmoothBool();
+final _kneesOK = SmoothBool();
+final _elbowsOK = SmoothBool();
+final _wristsOK = SmoothBool();
 
-bool isTreePose(List<List<double>> kpts) {
-  final rightAnkle = kpts[Keypoint.rightAnkle.index];
-  final leftKnee = kpts[Keypoint.leftKnee.index];
-  final leftAnkle = kpts[Keypoint.leftAnkle.index];
-  final rightKnee = kpts[Keypoint.rightKnee.index];
-  final leftWrist = kpts[Keypoint.leftWrist.index];
-  final rightWrist = kpts[Keypoint.rightWrist.index];
-  final nose = kpts[Keypoint.nose.index];
-  final leftShoulder = kpts[Keypoint.leftShoulder.index];
-  final rightShoulder = kpts[Keypoint.rightShoulder.index];
-
-  bool pieSobrePierna = (((rightAnkle[0] - leftKnee[0]).abs() < 0.1 &&
-          rightAnkle[1] < leftKnee[1]) ||
-      ((leftAnkle[0] - rightKnee[0]).abs() < 0.1 &&
-          leftAnkle[1] < rightKnee[1]));
-
-  bool ambasManosArriba = (leftWrist[1] < nose[1]) && (rightWrist[1] < nose[1]);
-  bool manosAlPechoReal = ((leftWrist[1] - leftShoulder[1]).abs() < 0.1 &&
-      (rightWrist[1] - rightShoulder[1]).abs() < 0.1);
-
-  // --- DEBUG ---
-  debugPrint('pieSobrePierna: $pieSobrePierna');
-  debugPrint('ambasManosArriba: $ambasManosArriba');
-  debugPrint('manosAlPechoReal: $manosAlPechoReal');
-
-  if (!pieSobrePierna) {
-    debugPrint('❌ Pie no está correctamente apoyado en la pierna contraria');
-  }
-  if (!(ambasManosArriba || manosAlPechoReal)) {
-    debugPrint('❌ Ni ambas manos arriba ni ambas al pecho');
-  }
-
-  return pieSobrePierna && (ambasManosArriba || manosAlPechoReal);
+const tolY = 192 * 0.10; // 10 % alto
+const tolXPx = 192 * 0.05; // 5 % ancho
+// -----------------------------------------------------------------------------
+// Funciones de postura – todas aceptan [debug] opcional para imprimir métricas.
+// -----------------------------------------------------------------------------
+bool ok(List<double> p, [double minScore = .45]) {
+  // Si vienes de xyKeypoints (sin score) => ok siempre
+  if (p.length < 3) return true;
+  return p[2] >= minScore;
 }
 
-bool isWarriorPose(List<List<double>> kpts) {
-  final leftShoulder = kpts[Keypoint.leftShoulder.index];
-  final rightShoulder = kpts[Keypoint.rightShoulder.index];
-  final leftElbow = kpts[Keypoint.leftElbow.index];
-  final rightElbow = kpts[Keypoint.rightElbow.index];
-  final leftKnee = kpts[Keypoint.leftKnee.index];
-  final rightKnee = kpts[Keypoint.rightKnee.index];
-  final leftHip = kpts[Keypoint.leftHip.index];
-  final rightHip = kpts[Keypoint.rightHip.index];
-  final leftAnkle = kpts[Keypoint.leftAnkle.index];
-  final rightAnkle = kpts[Keypoint.rightAnkle.index];
+bool isTreePose(List<List<double>> k, {bool debug = false}) {
+  final rk = k[Keypoint.rightKnee.index];
+  final lk = k[Keypoint.leftKnee.index];
+  final ra = k[Keypoint.rightAnkle.index];
+  final la = k[Keypoint.leftAnkle.index];
+  final rw = k[Keypoint.rightWrist.index];
+  final lw = k[Keypoint.leftWrist.index];
+  final ls = k[Keypoint.leftShoulder.index];
+  final rs = k[Keypoint.rightShoulder.index];
+  final nose = k[Keypoint.nose.index];
+
+  final pieSobrePierna = ((ra[0] - lk[0]).abs() < tolXPx && ra[1] < lk[1]) ||
+      ((la[0] - rk[0]).abs() < tolXPx && la[1] < rk[1]);
+
+  final manosArriba = rw[1] < nose[1] && lw[1] < nose[1];
+
+  final manosPecho = (rw[1] < rs[1] + tolY) && (lw[1] < ls[1] + tolY);
+
+  logMetric('pie_sobre_pierna', pieSobrePierna ? 1 : 0, debug: debug);
+  logMetric('manos_arriba', manosArriba ? 1 : 0, debug: debug);
+  logMetric('manos_pecho', manosPecho ? 1 : 0, debug: debug);
+
+  return pieSobrePierna && (manosArriba ^ manosPecho);
+}
+
+bool isWarriorPose(List<List<double>> k, {bool debug = false}) {
+  final leftShoulder = k[Keypoint.leftShoulder.index];
+  final rightShoulder = k[Keypoint.rightShoulder.index];
+  final leftElbow = k[Keypoint.leftElbow.index];
+  final rightElbow = k[Keypoint.rightElbow.index];
+  final leftKnee = k[Keypoint.leftKnee.index];
+  final rightKnee = k[Keypoint.rightKnee.index];
+  final leftHip = k[Keypoint.leftHip.index];
+  final rightHip = k[Keypoint.rightHip.index];
+  final leftAnkle = k[Keypoint.leftAnkle.index];
+  final rightAnkle = k[Keypoint.rightAnkle.index];
 
   // 1. Brazos alineados (hombro-codo)
   final yMediaShoulders = (leftShoulder[1] + rightShoulder[1]) / 2;
@@ -97,128 +99,205 @@ bool isWarriorPose(List<List<double>> kpts) {
       separacionTobillos;
 }
 
-bool isCobraPose(List<List<double>> kpts) {
-  final leftHip = kpts[Keypoint.leftHip.index];
-  final rightHip = kpts[Keypoint.rightHip.index];
-  final leftShoulder = kpts[Keypoint.leftShoulder.index];
-  final rightShoulder = kpts[Keypoint.rightShoulder.index];
-  final leftWrist = kpts[Keypoint.leftWrist.index];
-  final rightWrist = kpts[Keypoint.rightWrist.index];
+bool isGoddessPose(List<List<double>> k, {bool debug = false}) {
+  // ─── 0. Puntos ----------------------------------------------------------------
+  final aL = k[Keypoint.leftAnkle.index];
+  final aR = k[Keypoint.rightAnkle.index];
+  final kL = k[Keypoint.leftKnee.index];
+  final kR = k[Keypoint.rightKnee.index];
+  final hL = k[Keypoint.leftHip.index];
+  final hR = k[Keypoint.rightHip.index];
+  final sL = k[Keypoint.leftShoulder.index];
+  final sR = k[Keypoint.rightShoulder.index];
+  final eL = k[Keypoint.leftElbow.index];
+  final eR = k[Keypoint.rightElbow.index];
+  final wL = k[Keypoint.leftWrist.index];
+  final wR = k[Keypoint.rightWrist.index];
 
-  // Menos exigente con la diferencia hombros-caderas
-  final alturaShouldersVsHips = ((leftShoulder[1] + rightShoulder[1]) / 2.0) -
-      ((leftHip[1] + rightHip[1]) / 2.0);
-  final manosCercaCaderas =
-      (dist(leftWrist, leftHip) < 0.23) && (dist(rightWrist, rightHip) < 0.23);
+  // ─── 1. Piernas anchas ---------------------------------------------------------
+  final hipW = (hL[0] - hR[0]).abs();
+  final anklesWideNow = (aL[0] - aR[0]).abs() > hipW * 1.25;
+  final anklesWide = _ankleOK.add(anklesWideNow);
 
-  return alturaShouldersVsHips < -0.12 && manosCercaCaderas;
+  // ─── 2. Rodillas ≈ 90 ° (ángulo) ----------------------------------------------
+  final angL = angle3Pts(hL, kL, aL); // 70–110 °
+  final angR = angle3Pts(hR, kR, aR);
+  final kneesBentNow =
+      (angL > 55 && angL < 140) && (angR > 55 && angR < 140); // 55-140°
+  final kneesBent = _kneesOK.add(kneesBentNow);
+
+  // ─── 3. Codos a la altura de hombros ------------------------------------------
+  final elbowLvlNow =
+      (eL[1] - sL[1]).abs() < 0.15 && (eR[1] - sR[1]).abs() < 0.15;
+  final elbowsLvl = _elbowsOK.add(elbowLvlNow);
+
+  // ─── 4. Muñecas ligeramente por encima de codos --------------------------------
+  const tolW = 0.04;
+  final wristsUpNow = wL[1] < eL[1] + tolW && wR[1] < eR[1] + tolW;
+  final wristsUp = _wristsOK.add(wristsUpNow);
+
+  // ─── 5. Debug ------------------------------------------------------------------
+  if (debug) {
+    // imprime la métrica “cruda” (sin suavizar) y la suavizada
+    void log(String name, bool now, bool smoothed) =>
+        print('$name: ${now ? 1 : 0}  ->  ${smoothed ? 1 : 0}');
+    log('anklesWide', anklesWideNow, anklesWide);
+    log('kneesBent', kneesBentNow, kneesBent);
+    log('elbowsLvl', elbowLvlNow, elbowsLvl);
+    log('wristsUp', wristsUpNow, wristsUp);
+  }
+
+  // ─── 6. Decisión ---------------------------------------------------------------
+  final okParts = [anklesWide, kneesBent, elbowsLvl, wristsUp].where((v) => v);
+  return okParts.length >= 2; // al menos 3 de 4
 }
 
-bool isDogPose(List<List<double>> kpts) {
-  final leftHip = kpts[Keypoint.leftHip.index];
-  final rightHip = kpts[Keypoint.rightHip.index];
-  final leftWrist = kpts[Keypoint.leftWrist.index];
-  final rightWrist = kpts[Keypoint.rightWrist.index];
-  final leftAnkle = kpts[Keypoint.leftAnkle.index];
-  final rightAnkle = kpts[Keypoint.rightAnkle.index];
+// ─────────────────────────────────────────────────────────────
+// 2. CHAIR  (Utkatasana)
+// ─────────────────────────────────────────────────────────────
+bool isChairPose(List<List<double>> k, {bool debug = false}) {
+  final lAnkle = k[Keypoint.leftAnkle.index];
+  final rAnkle = k[Keypoint.rightAnkle.index];
+  final lKnee = k[Keypoint.leftKnee.index];
+  final rKnee = k[Keypoint.rightKnee.index];
+  final lHip = k[Keypoint.leftHip.index];
+  final rHip = k[Keypoint.rightHip.index];
+  final lShoulder = k[Keypoint.leftShoulder.index];
+  final rShoulder = k[Keypoint.rightShoulder.index];
+  final lElbow = k[Keypoint.leftElbow.index];
+  final rElbow = k[Keypoint.rightElbow.index];
+  final lWrist = k[Keypoint.leftWrist.index];
+  final rWrist = k[Keypoint.rightWrist.index];
 
-  // Más flexible: caderas solo un poco arriba de muñecas y tobillos
-  final avgHipY = (leftHip[1] + rightHip[1]) / 2.0;
-  final avgWristY = (leftWrist[1] + rightWrist[1]) / 2.0;
-  final avgAnkleY = (leftAnkle[1] + rightAnkle[1]) / 2.0;
+  // ➊ Pies casi juntos
+  final feetTogether = (lAnkle[0] - rAnkle[0]).abs() < 0.4;
 
-  final caderasArriba =
-      avgHipY < avgWristY - 0.04 && avgHipY < avgAnkleY - 0.04;
-  return caderasArriba;
+  // ➋ Rodillas por delante de las caderas (flexión ≥ ≈90°)
+  final kneesBent = lKnee[1] > lHip[1] + 0.25 && rKnee[1] > rHip[1] + 0.25;
+
+  // ➌ Brazos estirados por encima de la cabeza (línea hombro-muñeca)
+  final armsUp = lWrist[1] < lShoulder[1] - 0.1 &&
+      rWrist[1] < rShoulder[1] - 0.1 &&
+      // codos casi rectos
+      (lElbow[1] - lWrist[1]).abs() < 0.2 &&
+      (rElbow[1] - rWrist[1]).abs() < 0.2;
+
+  // ➍ Inclinación del tronco : hombros algo delante de caderas
+  final torsoForward =
+      lShoulder[0] > lHip[0] + 0.1 && rShoulder[0] > rHip[0] + 0.1;
+
+  logMetric('feetTogether', feetTogether ? 1 : 0, debug: debug);
+  logMetric('kneesBent', kneesBent ? 1 : 0, debug: debug);
+  logMetric('armsUp', armsUp ? 1 : 0, debug: debug);
+  logMetric('torsoFwd', torsoForward ? 1 : 0, debug: debug);
+
+  return feetTogether && kneesBent && armsUp && torsoForward;
 }
 
-// no_pose, igual menos restrictivo
-bool isNoPose(List<List<double>> kpts) {
-  final leftHip = kpts[Keypoint.leftHip.index];
-  final rightHip = kpts[Keypoint.rightHip.index];
-  final leftShoulder = kpts[Keypoint.leftShoulder.index];
-  final rightShoulder = kpts[Keypoint.rightShoulder.index];
-  final leftWrist = kpts[Keypoint.leftWrist.index];
-  final rightWrist = kpts[Keypoint.rightWrist.index];
-  final leftAnkle = kpts[Keypoint.leftAnkle.index];
-  final rightAnkle = kpts[Keypoint.rightAnkle.index];
+// Postura base "sin pose" (de pie, brazos abajo)
+bool isNoPose(List<List<double>> k, {bool debug = false}) {
+  final alineacionPiernas =
+      ((k[Keypoint.leftHip.index][0] - k[Keypoint.leftAnkle.index][0]).abs() <
+              0.15) &&
+          ((k[Keypoint.rightHip.index][0] - k[Keypoint.rightAnkle.index][0])
+                  .abs() <
+              0.15);
+  final hombrosAlineados =
+      ((k[Keypoint.leftShoulder.index][0] - k[Keypoint.leftHip.index][0])
+                  .abs() <
+              0.20) &&
+          ((k[Keypoint.rightShoulder.index][0] - k[Keypoint.rightHip.index][0])
+                  .abs() <
+              0.20);
+  final brazosAbajo =
+      k[Keypoint.leftWrist.index][1] > k[Keypoint.leftHip.index][1] &&
+          k[Keypoint.rightWrist.index][1] > k[Keypoint.rightHip.index][1];
 
-  // Solo chequea que la persona esté más o menos recta y brazos abajo
-  final alineacionPiernas = ((leftHip[0] - leftAnkle[0]).abs() < 0.15) &&
-      ((rightHip[0] - rightAnkle[0]).abs() < 0.15);
-  final hombrosCaderasAlineados =
-      ((leftShoulder[0] - leftHip[0]).abs() < 0.20) &&
-          ((rightShoulder[0] - rightHip[0]).abs() < 0.20);
-  final brazosAbajo = leftWrist[1] > leftHip[1] && rightWrist[1] > rightHip[1];
+  logMetric('piernas_rectas', alineacionPiernas ? 1 : 0, debug: debug);
+  logMetric('hombros_rectos', hombrosAlineados ? 1 : 0, debug: debug);
+  logMetric('brazos_abajo', brazosAbajo ? 1 : 0, debug: debug);
 
-  return alineacionPiernas && hombrosCaderasAlineados && brazosAbajo;
+  return alineacionPiernas && hombrosAlineados && brazosAbajo;
 }
 
-bool isPoseSelectedCorrect(List<List<double>> kpts, String selectedPose) {
+// -----------------------------------------------------------------------------
+// Orquestador: determina si la postura elegida es correcta
+// -----------------------------------------------------------------------------
+
+bool isPoseSelectedCorrect(List<List<double>> k, String selectedPose,
+    {bool debug = false}) {
   switch (selectedPose.toLowerCase()) {
     case 'tree':
-      return isTreePose(kpts);
+      return isTreePose(k, debug: debug);
     case 'warrior':
-      return isWarriorPose(kpts);
+      return isWarriorPose(k, debug: debug);
     case 'cobra':
-      return isCobraPose(kpts);
+      return isGoddessPose(k, debug: debug);
     case 'dog':
-      return isDogPose(kpts);
+      return isChairPose(k, debug: debug);
     default:
-      return false;
+      return isNoPose(k, debug: debug);
   }
 }
 
-String getTreeFeedback(List<List<double>> kpts) {
-  final leftAnkle = kpts[Keypoint.leftAnkle.index];
-  final rightKnee = kpts[Keypoint.rightKnee.index];
-  final rightAnkle = kpts[Keypoint.rightAnkle.index];
-  final leftKnee = kpts[Keypoint.leftKnee.index];
-  final leftWrist = kpts[Keypoint.leftWrist.index];
-  final rightWrist = kpts[Keypoint.rightWrist.index];
-  final nose = kpts[Keypoint.nose.index];
+// -----------------------------------------------------------------------------
+// Feedback (sin cambios de fondo, pero podrías usar métricas para personalizar)
+// -----------------------------------------------------------------------------
+
+String getTreeFeedback(List<List<double>> k) {
+  final leftAnkle = k[Keypoint.leftAnkle.index];
+  final rightKnee = k[Keypoint.rightKnee.index];
+  final rightAnkle = k[Keypoint.rightAnkle.index];
+  final leftKnee = k[Keypoint.leftKnee.index];
+  final leftWrist = k[Keypoint.leftWrist.index];
+  final rightWrist = k[Keypoint.rightWrist.index];
+  final nose = k[Keypoint.nose.index];
 
   if ((rightAnkle[0] - leftKnee[0]).abs() > 0.15 &&
       (leftAnkle[0] - rightKnee[0]).abs() > 0.15) {
-    return "Asegúrate de apoyar el pie sobre la pierna contraria.";
+    return 'Asegura el pie sobre la pierna contraria.';
   }
   if (leftWrist[1] > nose[1] && rightWrist[1] > nose[1]) {
-    return "¡Prueba a subir los brazos para mayor dificultad!";
+    return 'Prueba a subir los brazos para mayor reto.';
   }
-  return "¡Excelente Árbol! Mantén el equilibrio y respira profundo.";
+  return '¡Buen Árbol! Mantén el equilibrio y respira.';
 }
 
-String getWarriorFeedback(List<List<double>> kpts) {
-  final leftShoulder = kpts[Keypoint.leftShoulder.index];
-  final rightShoulder = kpts[Keypoint.rightShoulder.index];
-  final leftWrist = kpts[Keypoint.leftWrist.index];
-  final rightWrist = kpts[Keypoint.rightWrist.index];
-  final leftKnee = kpts[Keypoint.leftKnee.index];
-  final leftHip = kpts[Keypoint.leftHip.index];
+String getWarriorFeedback(List<List<double>> k) {
+  final angRodilla = angle3Pts(k[Keypoint.leftHip.index],
+      k[Keypoint.leftKnee.index], k[Keypoint.leftAnkle.index]);
 
-  if ((leftWrist[1] - leftShoulder[1]).abs() > 0.12 ||
-      (rightWrist[1] - rightShoulder[1]).abs() > 0.12) {
-    return "Brazos deben estar alineados y rectos.";
+  if ((90 - angRodilla).abs() > 15) {
+    final falta = (angRodilla - 90).round();
+    return 'Flexiona la rodilla $falta° más.';
   }
-  if ((leftKnee[1] - leftHip[1]) < 0.07) {
-    return "Flexiona más la pierna delantera.";
-  }
-  return "¡Perfecto Guerrero! Mantén la fuerza en las piernas.";
+  return '¡Excelente Guerrero! Mantén la fuerza.';
 }
 
-String getFeedback(String poseClass, List<List<double>> kpts) {
+String getFeedback(String poseClass, List<List<double>> k) {
   switch (poseClass) {
     case 'tree':
-      return getTreeFeedback(kpts);
+      return getTreeFeedback(k);
     case 'warrior':
-      return getWarriorFeedback(kpts);
+      return getWarriorFeedback(k);
     case 'cobra':
       return '¡Excelente Cobra!';
     case 'dog':
       return '¡Buen Down Dog!';
-    case 'no_pose':
-      return 'Relájate y prepárate para la próxima postura.';
     default:
-      return 'No se reconoce la postura. Ajusta tu alineación.';
+      return 'Relájate y prepárate para la siguiente postura.';
+  }
+}
+
+class SmoothBool {
+  final int _win;
+  final _q = Queue<bool>();
+  SmoothBool([this._win = 5]);
+
+  bool add(bool v) {
+    _q.addLast(v);
+    if (_q.length > _win) _q.removeFirst();
+    // “verdadero” si TODOS los valores recientes son true
+    return _q.every((e) => e);
   }
 }

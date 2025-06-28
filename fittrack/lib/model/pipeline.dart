@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:camera/camera.dart';
 import 'package:fittrack/utils/image_utils.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +26,6 @@ class PosePipelineHelper {
 
   late final Interpreter _movenet;
   bool _initialized = false;
-  bool _isProcessing = false;
 
   Future<void> init() async {
     _movenet = await Interpreter.fromAsset(movenetPath);
@@ -40,13 +41,13 @@ class PosePipelineHelper {
       if (rgbImage == null) throw Exception('No se pudo convertir la imagen');
 
       img.Image inputMovenet =
-          img.copyResize(rgbImage, width: 256, height: 256);
+          img.copyResize(rgbImage, width: 192, height: 192);
 
       var movenetInput = List.generate(
           1,
           (_) => List.generate(
-              256,
-              (y) => List.generate(256, (x) {
+              192,
+              (y) => List.generate(192, (x) {
                     final pixel = inputMovenet.getPixel(x, y);
                     return [pixel.r, pixel.g, pixel.b];
                   })));
@@ -61,9 +62,7 @@ class PosePipelineHelper {
       final keypoints = List<List<double>>.generate(
           17, (i) => List<double>.from(keypointsOutput[0][0][i]));
       debugPrint('Keypoints con score: ${keypoints.map((k) => k[2]).toList()}');
-
-      // Filtra puntos poco confiables
-      final confiables = keypoints.where((k) => k[2] > 0.2).toList();
+      final confiables = keypoints.where((k) => k[2] > 0.4).toList();
       if (confiables.length < 12) {
         return PoseClassificationResult(
           keypoints: keypoints,
@@ -73,10 +72,11 @@ class PosePipelineHelper {
               "Por favor, ajusta la cámara para que tu cuerpo entero sea visible.",
         );
       }
-
       final xyKeypoints = keypoints.map((kpt) => [kpt[0], kpt[1]]).toList();
+
       debugPrint('🔄 Keypoints normalizados: $xyKeypoints');
-      final bool isCorrect = isPoseSelectedCorrect(xyKeypoints, selectedPose);
+      final bool isCorrect =
+          isPoseSelectedCorrect(xyKeypoints, selectedPose, debug: true);
       String poseClass = isCorrect ? selectedPose.toLowerCase() : 'unknown';
       String feedback = isCorrect
           ? getFeedback(selectedPose, xyKeypoints)
