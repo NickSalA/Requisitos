@@ -135,9 +135,7 @@ class PoseSessionViewModel extends ChangeNotifier {
 
   Future<void> _guardarEnHistorial(Yoga yoga) async {
     final repo = YogaRepository();
-    final actual = await repo.fetchYoga();
-    actual.add(yoga);
-    await repo.saveYoga(actual);
+  await repo.saveYoga([yoga]);
   }
 
   @override

@@ -121,7 +121,7 @@ class PosePipelineHelper {
     } else if (clase.toLowerCase().contains('warrior')) {
       feedback = 'Excelente postura de Guerrero.';
       // Más reglas específicas para Warrior si lo deseas
-    } else if (clase.toLowerCase().contains('dog')) {
+    } else if (clase.toLowerCase().contains('downdog')) {
       feedback = 'Excelente postura de Down Dog.';
     } else if (normalized[5][1] > normalized[7][1]) {
       feedback = 'Alinea tus brazos correctamente.';

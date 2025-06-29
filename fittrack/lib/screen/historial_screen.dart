@@ -8,25 +8,25 @@ class HistorialScreen extends StatelessWidget {
   const HistorialScreen({super.key});
 
   // Lista de posturas de yoga
-  final List<String> _yogaPostures = const ['Cobra', 'Warrior2', 'Tree', 'Downdog'];
+  final List<String> _yogaPostures = const ['cobra', 'warrior', 'tree', 'downdog'];
   final List<String> _ejercicios = const [
-    'Sentadilla', 
-    'Planchas', 
-    'Curl de Bíceps', 
-    'Laterales hombros'
+    'sentadilla', 
+    'planchas', 
+    'curl de bíceps', 
+    'laterales hombros'
   ];
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> items = [
-      {'nombre': 'Cobra', 'imagen': 'assets/icons/cobra.png', 'tipo': 'yoga'},
-      {'nombre': 'Warrior2', 'imagen': 'assets/icons/guerrero.png', 'tipo': 'yoga'},
-      {'nombre': 'Tree', 'imagen': 'assets/icons/arbol.png', 'tipo': 'yoga'},
-      {'nombre': 'Downdog', 'imagen': 'assets/icons/downdog.png', 'tipo': 'yoga'},
-      {'nombre': 'Sentadilla', 'imagen': 'assets/icons/sentadillas.png', 'tipo': 'ejercicio'},
-      {'nombre': 'Planchas', 'imagen': 'assets/icons/planchas.png', 'tipo': 'ejercicio'},
-      {'nombre': 'Curl de Bíceps', 'imagen': 'assets/icons/curl de biceps.png', 'tipo': 'ejercicio'},
+      {'nombre': 'cobra', 'imagen': 'assets/icons/cobra.png', 'tipo': 'yoga'},
+      {'nombre': 'warrior', 'imagen': 'assets/icons/guerrero.png', 'tipo': 'yoga'},
+      {'nombre': 'tree', 'imagen': 'assets/icons/arbol.png', 'tipo': 'yoga'},
+      {'nombre': 'downdog', 'imagen': 'assets/icons/downdog.png', 'tipo': 'yoga'},
+      {'nombre': 'sentadilla', 'imagen': 'assets/icons/sentadillas.png', 'tipo': 'ejercicio'},
+      {'nombre': 'planchas', 'imagen': 'assets/icons/planchas.png', 'tipo': 'ejercicio'},
+      {'nombre': 'curl de bíceps', 'imagen': 'assets/icons/curl de biceps.png', 'tipo': 'ejercicio'},
       {
-        'nombre': 'Laterales hombros',
+        'nombre': 'laterales hombros',
         'imagen': 'assets/icons/laterales hombros.png',
         'tipo': 'ejercicio'
       },
