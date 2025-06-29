@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:fittrack/screen/FAQ.dart';
-import 'package:fittrack/screen/ejericicios_screen.dart';
+import 'package:fittrack/screen/cronometro_screen.dart';
 import 'package:fittrack/screen/historial_screen.dart';
 import 'package:fittrack/screen/yoga_screen.dart';
 import 'package:flutter/material.dart';
@@ -34,35 +34,35 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-void _onButtonTap(String nombreBoton) {
-  final boton = nombreBoton.trim().toLowerCase();
+  void _onButtonTap(String nombreBoton) {
+    final boton = nombreBoton.trim().toLowerCase();
 
-  if (boton == 'ejercicio') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const EjerciciosScreen()),
-    );
-  } else if (boton == 'yoga') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const YogaScreen()),
-    );
-  } else if (boton == 'faq'){
-    Navigator.push(
-      context,MaterialPageRoute(builder: (contex) => FAQ_screen()),
-    );
-
-  } else if (boton == 'historial'){
-    Navigator.push(
-      context,MaterialPageRoute(builder: (contex) => HistorialScreen()),
-    );
+    if (boton == 'ejercicio') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const EjerciciosScreen()),
+      );
+    } else if (boton == 'yoga') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const YogaScreen()),
+      );
+    } else if (boton == 'faq') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (contex) => FAQ_screen()),
+      );
+    } else if (boton == 'historial') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (contex) => HistorialScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Has presionado $nombreBoton')),
+      );
+    }
   }
-  else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Has presionado $nombreBoton')),
-    );
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +151,8 @@ void _onButtonTap(String nombreBoton) {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(2, 2))
+            BoxShadow(
+                color: Colors.black12, blurRadius: 6, offset: Offset(2, 2))
           ],
         ),
         child: Column(

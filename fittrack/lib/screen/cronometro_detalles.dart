@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../model/ejercicio.dart';
-import '../modelView/ejercicio_session_view_model.dart';
-import '../screen/ejercicio_sesion_screen.dart';
+import '../model/modo_cronometro.dart';
 
-class EjercicioDetailScreen extends StatefulWidget {
-  final Ejercicio ejercicio;
+class CronometroDetailScreen extends StatefulWidget {
+  final ModoCronometro cronometro;
 
-  const EjercicioDetailScreen({super.key, required this.ejercicio});
+  const CronometroDetailScreen({super.key, required this.cronometro});
 
   @override
-  State<EjercicioDetailScreen> createState() => _EjercicioDetailScreenState();
+  State<CronometroDetailScreen> createState() => _EjercicioDetailScreenState();
 }
 
-class _EjercicioDetailScreenState extends State<EjercicioDetailScreen> {
+class _EjercicioDetailScreenState extends State<CronometroDetailScreen> {
   final TextEditingController _seriesController = TextEditingController();
   final TextEditingController _repeticionesController = TextEditingController();
   final TextEditingController _descansoController = TextEditingController();
@@ -75,7 +73,9 @@ class _EjercicioDetailScreenState extends State<EjercicioDetailScreen> {
                 final repeticiones = _repeticionesController.text;
                 final descanso = _descansoController.text;
 
-                if (series.isEmpty || repeticiones.isEmpty || descanso.isEmpty) {
+                if (series.isEmpty ||
+                    repeticiones.isEmpty ||
+                    descanso.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text("Por favor, completa todos los campos.")),
@@ -150,7 +150,7 @@ class _EjercicioDetailScreenState extends State<EjercicioDetailScreen> {
             filled: true,
             fillColor: const Color(0xFFF0F0F0),
             contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,

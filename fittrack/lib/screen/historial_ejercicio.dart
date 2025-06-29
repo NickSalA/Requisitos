@@ -1,9 +1,9 @@
 import 'dart:math';
-import 'package:fittrack/repository/ejercicio_repositorio.dart';
+import 'package:fittrack/repository/modo_cronometro_repositorio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:fittrack/model/ejercicio.dart';
+import 'package:fittrack/model/modo_cronometro.dart';
 
 class HistorialEjercicioScreen extends StatefulWidget {
   final String exerciseName;
@@ -11,15 +11,16 @@ class HistorialEjercicioScreen extends StatefulWidget {
   const HistorialEjercicioScreen({super.key, required this.exerciseName});
 
   @override
-  State<HistorialEjercicioScreen> createState() => _HistorialEjercicioScreenState();
+  State<HistorialEjercicioScreen> createState() =>
+      _HistorialEjercicioScreenState();
 }
 
 class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
-  late Future<List<Ejercicio>> _ejercicioDataFuture;
+  late Future<List<ModoCronometro>> _ejercicioDataFuture;
   final List<String> _tiposEjercicios = const [
-    'Sentadilla', 
-    'Planchas', 
-    'Curl de Bíceps', 
+    'Sentadilla',
+    'Planchas',
+    'Curl de Bíceps',
     'Laterales hombros'
   ];
 
@@ -36,11 +37,12 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
     return _ejercicioDataFuture;
   }
 
-  Future<List<Ejercicio>> _fetchEjercicioData() async {
+  Future<List<ModoCronometro>> _fetchEjercicioData() async {
     final ejercicioRepo = EjercicioRepository();
     final listaEjercicios = await ejercicioRepo.fetchEjercicios();
-    
-    final filtered = listaEjercicios.where((e) => e.nombre == widget.exerciseName).toList();
+
+    final filtered =
+        listaEjercicios.where((e) => e.nombre == widget.exerciseName).toList();
     /*
     if (filtered.isEmpty && _tiposEjercicios.contains(widget.exerciseName)) {
       return _generateTestData();
@@ -111,17 +113,17 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
         children: [
           _buildPurpleHeader(),
           SafeArea(
-            child: FutureBuilder<List<Ejercicio>>(
+            child: FutureBuilder<List<ModoCronometro>>(
               future: _ejercicioDataFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return _buildLoadingIndicator();
                 }
-                
+
                 if (snapshot.hasError) {
                   return _buildErrorState(snapshot.error.toString());
                 }
-                
+
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return _buildEmptyState();
                 }
@@ -130,7 +132,6 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
               },
             ),
           ),
-          
         ],
       ),
     );
@@ -185,7 +186,7 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
     );
   }
 
-  Widget _buildContent(List<Ejercicio> ejercicios) {
+  Widget _buildContent(List<ModoCronometro> ejercicios) {
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -212,7 +213,7 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
     );
   }
 
-  Widget _buildHistoryTable(List<Ejercicio> ejercicios) {
+  Widget _buildHistoryTable(List<ModoCronometro> ejercicios) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Container(
@@ -252,26 +253,28 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
             child: Text('Fecha', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           Expanded(
-            child: Text('Series', style: TextStyle(fontWeight: FontWeight.bold), 
-            textAlign: TextAlign.center),
+            child: Text('Series',
+                style: TextStyle(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center),
           ),
           Expanded(
-            child: Text('Rep. efectivas', style: TextStyle(fontWeight: FontWeight.bold), 
-            textAlign: TextAlign.center),
+            child: Text('Rep. efectivas',
+                style: TextStyle(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center),
           ),
-
           Expanded(
-            child: Text('Descanso', style: TextStyle(fontWeight: FontWeight.bold), 
-            textAlign: TextAlign.center),
+            child: Text('Descanso',
+                style: TextStyle(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTableRow(Ejercicio ejercicio) {
+  Widget _buildTableRow(ModoCronometro ejercicio) {
     final dateFormat = DateFormat('dd/MM/yyyy');
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       child: Row(
@@ -282,22 +285,14 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
           ),
           Expanded(
             child: Text(
-              ejercicio.series.toString(),
+              'Duracion',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.black54,
+              ),
               textAlign: TextAlign.center,
             ),
-          ),
-          Expanded(
-            child: Text(
-              ejercicio.repeticiones.toString(),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              '${ejercicio.descanso}s',
-              textAlign: TextAlign.center,
-            ),
-          ),
+          )
         ],
       ),
     );

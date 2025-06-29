@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../modelView/yoga_provider.dart';
-import 'sesion_yoga_screen.dart'; // Esta será la pantalla que usa cámara
+import '../modelView/cronometro_provider.dart';
+import 'sesion_cronometro_screen.dart'; // Esta será la pantalla que usa cámara
 
-class SeleccionYogaScreen extends StatefulWidget {
-  const SeleccionYogaScreen({super.key});
+class SeleccionCronometroScreen extends StatefulWidget {
+  const SeleccionCronometroScreen({super.key});
 
   @override
-  State<SeleccionYogaScreen> createState() => _SeleccionYogaScreenState();
+  State<SeleccionCronometroScreen> createState() => _SeleccionYogaScreenState();
 }
 
-class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
+class _SeleccionYogaScreenState extends State<SeleccionCronometroScreen> {
   final TextEditingController _tiempoController = TextEditingController();
 
   @override
@@ -22,8 +22,9 @@ class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final yoga = context.watch<YogaSessionViewModel>().selectedPose;
-    if (yoga == null) {
+    final cronometro =
+        context.watch<CronoometroSessionViewModel>().selectedCronometro;
+    if (cronometro == null) {
       return const Scaffold(
         body: Center(child: Text("No se seleccionó ninguna postura")),
       );
@@ -31,7 +32,7 @@ class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Yoga"),
+        title: const Text("Carrusel de Poses"),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -65,13 +66,13 @@ class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
                 child: Column(
                   children: [
                     Image.asset(
-                      yoga.imagenPath,
+                      cronometro.imagenPath,
                       width: 40,
                       height: 40,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      yoga.nombre,
+                      cronometro.nombre,
                       style: GoogleFonts.montserrat(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -119,13 +120,14 @@ class _SeleccionYogaScreenState extends State<SeleccionYogaScreen> {
 
                     if (tiempo != null && tiempo > 0) {
                       context
-                          .read<YogaSessionViewModel>()
+                          .read<CronoometroSessionViewModel>()
                           .setTiempoObjetivo(tiempo);
 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => SesionYogaScreen(), // a implementar
+                          builder: (_) =>
+                              SesionCronometroScreen(), // a implementar
                         ),
                       );
                     } else {

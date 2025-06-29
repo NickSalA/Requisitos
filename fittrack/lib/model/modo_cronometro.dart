@@ -1,20 +1,17 @@
 import 'reto.dart';
 
-class Ejercicio extends Reto {
-  int series;
-  int repeticiones;
-  int descanso;
-
-  Ejercicio({
+class ModoCronometro extends Reto {
+  int duracion;
+  List<String> posesPath = [];
+  ModoCronometro({
     required int id,
     required String nombre,
     required String descripcion,
     required String tipo,
     required DateTime fechaCreacion,
     required String imagenPath,
-    required this.series,
-    required this.repeticiones,
-    required this.descanso,
+    required this.duracion,
+    required List<String> posesPath,
   }) : super(
           id,
           nombre,
@@ -36,29 +33,27 @@ class Ejercicio extends Reto {
       'descripcion': descripcion,
       'imagenPath': imagenPath,
       'tipo': tipo,
-      'series': series,
-      'repeticiones': repeticiones,
-      'descanso': descanso,
+      'duracion': duracion,
       'fechaCreacion': fechaCreacion.toIso8601String(),
+      'posesPath': posesPath,
     };
   }
 
   @override
-  factory Ejercicio.fromJson(Map<String, dynamic> json) {
+  factory ModoCronometro.fromJson(Map<String, dynamic> json) {
     /// Documentacion para el método `fromJson`.
     /// Convierte un mapa JSON a un objeto Ejercicio.
     /// @param [json]: Mapa JSON que representa un objeto Ejercicio.
     /// @returns: [Ejercicio]: Objeto Ejercicio creado a partir del mapa JSON.
-    return Ejercicio(
+    return ModoCronometro(
       id: json['id'],
       nombre: json['nombre'],
       descripcion: json['descripcion'],
       imagenPath: json['imagenPath'],
       tipo: json['tipo'],
-      series: json['series'],
-      repeticiones: json['repeticiones'],
-      descanso: json['descanso'],
+      duracion: json['duracion'],
       fechaCreacion: DateTime.parse(json['fechaCreacion']),
+      posesPath: List<String>.from(json['posesPath'] ?? []),
     );
   }
 }
