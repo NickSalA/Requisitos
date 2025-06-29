@@ -50,11 +50,11 @@ class _YogaScreenState extends State<YogaScreen> {
     ),
     Yoga(
       id: 4,
-      nombre: 'dog',
+      nombre: 'downdog',
       descripcion: 'Ideal para meditación y relajación',
       imagenPath: 'assets/icons/downdog.png',
       fechaCreacion: DateTime.now(),
-      tipo: 'dog',
+      tipo: 'downdog',
       duracion: 0,
       duractionCorrecta: 0,
       duracionIncorrecta: 0,
