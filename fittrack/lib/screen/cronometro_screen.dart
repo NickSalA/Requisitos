@@ -17,7 +17,7 @@ class _CronometroScreenState extends State<CronometroScreen> {
   final List<ModoCronometro> _cronometro = [
     ModoCronometro(
       id: 1,
-      nombre: 'Raices y equilibrio ',
+      nombre: 'Raices y equilibrio',
       descripcion:
           'Secuencia de 4 posturas suaves que te enraízan, relajan la zona lumbar y cultivan el equilibrio. Ideal para principiantes o como pausa activa para volver al centro en solo 15 minutos.',
       imagenPath: 'assets/icons/sesion_1.png',

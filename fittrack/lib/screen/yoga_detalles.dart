@@ -2,145 +2,101 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/yoga.dart';
 
-class YogaDetailScreen extends StatefulWidget {
+class YogaDetailScreen extends StatelessWidget {
   final Yoga yoga;
 
   const YogaDetailScreen({super.key, required this.yoga});
 
   @override
-  State<YogaDetailScreen> createState() => _YogaDetailScreenState();
-}
-
-class _YogaDetailScreenState extends State<YogaDetailScreen> {
-  final TextEditingController _duracionController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _duracionController.text = widget.yoga.duracion.toString();
-  }
-
-  @override
-  void dispose() {
-    _duracionController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(180),
-        child: AppBar(
-          automaticallyImplyLeading: true,
-          backgroundColor: const Color(0xFFA9A8F2),
-          elevation: 0,
-          centerTitle: true,
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(widget.yoga.imagenPath, height: 80),
-                const SizedBox(height: 10),
-                Text(
-                  widget.yoga.nombre,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      appBar: _buildAppBar(),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInputField("Tiempo:", _duracionController),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                final duracion = _duracionController.text;
-
-                if (duracion.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Por favor, completa el campo.")),
-                  );
-                  return;
-                }
-
-                final nuevaDuracion = int.tryParse(duracion);
-                if (nuevaDuracion == null || nuevaDuracion <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Duración inválida.")),
-                  );
-                  return;
-                }
-
-                setState(() {
-                  widget.yoga.duracion = nuevaDuracion;
-                });
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Sesión iniciada por $nuevaDuracion segundos.")),
-                );
-
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFA9A8F2),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: Text(
-                '¡Listo!',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+            _buildSectionTitle('¿Para qué sirve?'),
+            const SizedBox(height: 15),
+            _buildDescriptionText(yoga.descripcion),
+            const SizedBox(height: 30),
+            _buildSectionTitle('Descripción'),
+            const SizedBox(height: 15),
+            _buildDescriptionText(_getDescripcionExtendida(yoga.tipo)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+  /// AppBar personalizado con imagen y nombre
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(180),
+      child: AppBar(
+        automaticallyImplyLeading: true,
+        backgroundColor: const Color(0xFFA9A8F2),
+        elevation: 0,
+        centerTitle: true,
+        flexibleSpace: Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(yoga.imagenPath, height: 80),
+              const SizedBox(height: 10),
+              Text(
+                yoga.nombre,
+                style: GoogleFonts.montserrat(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFFF0F0F0),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
+  }
+
+  /// Título de cada sección
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.montserrat(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  /// Texto general con descripción
+  Widget _buildDescriptionText(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.poppins(
+        fontSize: 16,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  /// Descripción extendida por tipo de pose
+  String _getDescripcionExtendida(String tipo) {
+    switch (tipo.toLowerCase()) {
+      case 'goddess':
+        return 'La pose de la diosa fortalece la parte inferior del cuerpo, especialmente muslos y glúteos. Además, abre las caderas y mejora la estabilidad emocional.';
+      case 'tree':
+        return 'La pose del árbol desarrolla el equilibrio, la coordinación y la fuerza en las piernas. También promueve la concentración y la calma interior.';
+      case 'warrior':
+        return 'La pose del guerrero fortalece piernas y brazos, aumenta la resistencia y mejora la postura. Es ideal para desarrollar confianza y enfoque.';
+      case 'downdog':
+        return 'La postura del perro boca abajo estira y fortalece todo el cuerpo. Calma la mente y mejora la circulación. Es una de las poses más usadas para relajación.';
+      default:
+        return 'Esta pose de yoga aporta múltiples beneficios físicos y mentales, ayudando a mejorar tu bienestar general.';
+    }
   }
 }

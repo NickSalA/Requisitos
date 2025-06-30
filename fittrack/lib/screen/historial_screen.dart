@@ -1,4 +1,4 @@
-import 'package:fittrack/screen/historial_ejercicio.dart';
+import 'package:fittrack/screen/historial_sesiones_screen.dart';
 import 'package:fittrack/screen/historial_yoga.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,19 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 class HistorialScreen extends StatelessWidget {
   const HistorialScreen({super.key});
 
-  // Lista de posturas de yoga
-  final List<String> _yogaPostures = const [
-    'goddess',
-    'warrior',
-    'tree',
-    'downdog'
-  ];
-  final List<String> _ejercicios = const [
-    'sentadilla',
-    'planchas',
-    'curl de bíceps',
-    'laterales hombros'
-  ];
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> items = [
@@ -39,24 +26,24 @@ class HistorialScreen extends StatelessWidget {
         'tipo': 'yoga'
       },
       {
-        'nombre': 'sentadilla',
-        'imagen': 'assets/icons/sentadillas.png',
-        'tipo': 'ejercicio'
+        'nombre': 'Raices y equilibrio',
+        'imagen': 'assets/icons/sesion_1.png',
+        'tipo': 'sesion'
       },
       {
-        'nombre': 'planchas',
-        'imagen': 'assets/icons/planchas.png',
-        'tipo': 'ejercicio'
+        'nombre': 'Giros y Detox',
+        'imagen': 'assets/icons/sesion_2.png',
+        'tipo': 'sesion'
       },
       {
-        'nombre': 'curl de bíceps',
-        'imagen': 'assets/icons/curl de biceps.png',
-        'tipo': 'ejercicio'
+        'nombre': 'Fortalece y libera',
+        'imagen': 'assets/icons/sesion_3.png',
+        'tipo': 'sesion'
       },
       {
-        'nombre': 'laterales hombros',
-        'imagen': 'assets/icons/laterales hombros.png',
-        'tipo': 'ejercicio'
+        'nombre': 'Fuerza en la pared',
+        'imagen': 'assets/icons/sesion_4.png',
+        'tipo': 'sesion'
       },
       {'nombre': 'Próximamente', 'imagen': null, 'tipo': 'none'},
     ];
@@ -155,7 +142,7 @@ class HistorialScreen extends StatelessWidget {
   Widget _buildEntrenamientoButton(
       Map<String, dynamic> item, double size, BuildContext context) {
     final bool isYoga = item['tipo'] == 'yoga';
-    final bool isEjercicio = item['tipo'] == 'ejercicio';
+    final bool isSesion = item['tipo'] == 'sesion';
     final bool isComingSoon = item['imagen'] == null;
 
     return InkWell(
@@ -170,12 +157,12 @@ class HistorialScreen extends StatelessWidget {
                         HistorialYogaScreen(exerciseName: item['nombre']),
                   ),
                 );
-              } else if (isEjercicio) {
+              } else if (isSesion) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        HistorialEjercicioScreen(exerciseName: item['nombre']),
+                        HistorialSesionesScreen(sessionName: item['nombre']),
                   ),
                 );
               }
