@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:fittrack/screen/FAQ.dart';
 import 'package:fittrack/screen/cronometro_screen.dart';
+import 'package:fittrack/screen/faq_screen.dart';
 import 'package:fittrack/screen/historial_screen.dart';
 import 'package:fittrack/screen/yoga_screen.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (boton == 'faq') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (contex) => FAQ_screen()),
+        MaterialPageRoute(builder: (contex) => FAQScreen()),
       );
     } else if (boton == 'historial') {
       Navigator.push(

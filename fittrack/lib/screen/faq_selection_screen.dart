@@ -16,7 +16,7 @@ class FAQSelectionScreen extends StatelessWidget {
 
   void _contactarPorWhatsApp() async {
     final whatsappUrl = Uri.parse(
-        'https://wa.me/51994405280?text=Hola%2C%20necesito%20ayuda%20con%20la%20app%20FitTrack.');
+        'https://wa.me/51991258717?text=Hola%2C%20necesito%20ayuda%20con%20la%20app%20FitTrack.');
     if (await canLaunchUrl(whatsappUrl)) {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
     } else {
@@ -25,7 +25,7 @@ class FAQSelectionScreen extends StatelessWidget {
   }
 
   void _hacerLlamada() async {
-    final telUrl = Uri.parse('tel:+51994405280');
+    final telUrl = Uri.parse('tel:+51991258717');
     if (await canLaunchUrl(telUrl)) {
       await launchUrl(telUrl);
     } else {
