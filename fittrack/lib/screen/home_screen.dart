@@ -37,10 +37,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onButtonTap(String nombreBoton) {
     final boton = nombreBoton.trim().toLowerCase();
 
-    if (boton == 'ejercicio') {
+    if (boton == r'modo cronometro') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const EjerciciosScreen()),
+        MaterialPageRoute(builder: (context) => const CronometroScreen()),
       );
     } else if (boton == 'yoga') {
       Navigator.push(
@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisSpacing: 20,
                 childAspectRatio: 0.9, // Más alto
                 children: [
-                  _buildCard("Ejercicio", "assets/icons/ejerciciosHome.png"),
+                  _buildCard(r"Modo Cronometro", "assets/icons/yoga_2.png"),
                   _buildCard("Yoga", "assets/icons/yogaHome.png"),
                   _buildCard("FAQ", "assets/icons/faqHome.png"),
                   _buildCard("Historial", "assets/icons/historialHome.png"),

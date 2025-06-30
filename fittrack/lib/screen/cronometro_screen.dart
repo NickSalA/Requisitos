@@ -6,14 +6,14 @@ import 'package:provider/provider.dart';
 import '../modelView/cronometro_provider.dart';
 import 'cronometro_detalles.dart';
 
-class EjerciciosScreen extends StatefulWidget {
-  const EjerciciosScreen({super.key});
+class CronometroScreen extends StatefulWidget {
+  const CronometroScreen({super.key});
 
   @override
-  State<EjerciciosScreen> createState() => _CronometroScreenState();
+  State<CronometroScreen> createState() => _CronometroScreenState();
 }
 
-class _CronometroScreenState extends State<EjerciciosScreen> {
+class _CronometroScreenState extends State<CronometroScreen> {
   final List<ModoCronometro> _cronometro = [
     ModoCronometro(
       id: 1,
@@ -25,10 +25,10 @@ class _CronometroScreenState extends State<EjerciciosScreen> {
       tipo: 'Principiantes',
       duracion: 15, // Duración en segundos
       posesPath: [
-        'assets/modo_cronometro/sesion_1_1.png',
-        'assets/modo_cronometro/sesion_1_2.png',
-        'assets/modo_cronometro/sesion_1_3.png',
-        'assets/modo_cronometro/sesion_1_4.png',
+        'assets/icons/sesion_1_1.png',
+        'assets/icons/sesion_1_2.png',
+        'assets/icons/sesion_1_3.png',
+        'assets/icons/sesion_1_4.png',
       ],
     ),
     ModoCronometro(
@@ -41,10 +41,10 @@ class _CronometroScreenState extends State<EjerciciosScreen> {
       tipo: 'Intermedio',
       duracion: 30, // Duración en segundos
       posesPath: [
-        'assets/modo_cronometro/sesion_2_1.png',
-        'assets/modo_cronometro/sesion_2_2.png',
-        'assets/modo_cronometro/sesion_2_3.png',
-        'assets/modo_cronometro/sesion_2_4.png',
+        'assets/icons/sesion_2_1.png',
+        'assets/icons/sesion_2_2.png',
+        'assets/icons/sesion_2_3.png',
+        'assets/icons/sesion_2_4.png',
       ],
     ),
     ModoCronometro(
@@ -57,10 +57,10 @@ class _CronometroScreenState extends State<EjerciciosScreen> {
       tipo: 'Intermedio',
       duracion: 20, // Duración en segundos
       posesPath: [
-        'assets/modo_cronometro/sesion_3_1.png',
-        'assets/modo_cronometro/sesion_3_2.png',
-        'assets/modo_cronometro/sesion_3_3.png',
-        'assets/modo_cronometro/sesion_3_4.png',
+        'assets/icons/sesion_3_1.png',
+        'assets/icons/sesion_3_2.png',
+        'assets/icons/sesion_3_3.png',
+        'assets/icons/sesion_3_4.png',
       ],
     ),
     ModoCronometro(
@@ -73,10 +73,10 @@ class _CronometroScreenState extends State<EjerciciosScreen> {
       tipo: 'Avanzado',
       duracion: 25, // Duración en segundos
       posesPath: [
-        'assets/modo_cronometro/sesion_4_1.png',
-        'assets/modo_cronometro/sesion_4_2.png',
-        'assets/modo_cronometro/sesion_4_3.png',
-        'assets/modo_cronometro/sesion_4_4.png',
+        'assets/icons/sesion_4_1.png',
+        'assets/icons/sesion_4_2.png',
+        'assets/icons/sesion_4_3.png',
+        'assets/icons/sesion_4_4.png',
       ],
     ),
   ];

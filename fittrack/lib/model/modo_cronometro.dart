@@ -2,7 +2,7 @@ import 'reto.dart';
 
 class ModoCronometro extends Reto {
   int duracion;
-  List<String> posesPath = [];
+  List<String> posesPath;
   ModoCronometro({
     required int id,
     required String nombre,
@@ -11,7 +11,7 @@ class ModoCronometro extends Reto {
     required DateTime fechaCreacion,
     required String imagenPath,
     required this.duracion,
-    required List<String> posesPath,
+    required this.posesPath,
   }) : super(
           id,
           nombre,

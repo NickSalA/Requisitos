@@ -3,9 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../model/modo_cronometro.dart';
 
 class CronometroRepository {
-  static const _keyEjercicios = 'ejercicios';
+  static const _keyEjercicios = 'cronometro';
 
-  Future<void> saveEjercicios(List<ModoCronometro> cronometro) async {
+  Future<void> saveCronometro(List<ModoCronometro> cronometro) async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = json.encode(cronometro.map((e) => e.toJson()).toList());
     await prefs.setString(_keyEjercicios, jsonString);

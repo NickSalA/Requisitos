@@ -17,11 +17,11 @@ class _YogaScreenState extends State<YogaScreen> {
   final List<Yoga> _posesYoga = [
     Yoga(
       id: 1,
-      nombre: 'cobra',
+      nombre: 'goddess',
       descripcion: 'Mejora el equilibrio y la concentración',
-      imagenPath: 'assets/icons/cobra.png',
+      imagenPath: 'assets/icons/goddess.png',
       fechaCreacion: DateTime.now(),
-      tipo: 'cobra',
+      tipo: 'goddess',
       duracion: 0,
       duractionCorrecta: 0,
       duracionIncorrecta: 0,

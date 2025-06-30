@@ -4,12 +4,14 @@ import 'package:provider/provider.dart';
 import 'screen/splash_decider.dart';
 import 'modelView/yoga_provider.dart';
 import 'modelView/sesion_yoga_screen.dart';
+import 'modelView/cronometro_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => YogaSessionViewModel()),
     ChangeNotifierProvider(create: (_) => PoseSessionViewModel()),
+    ChangeNotifierProvider(create: (_) => CronoometroSessionViewModel()),
   ], child: const FitTrackApp()));
 }
 

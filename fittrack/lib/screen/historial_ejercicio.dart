@@ -38,8 +38,8 @@ class _HistorialEjercicioScreenState extends State<HistorialEjercicioScreen> {
   }
 
   Future<List<ModoCronometro>> _fetchEjercicioData() async {
-    final ejercicioRepo = EjercicioRepository();
-    final listaEjercicios = await ejercicioRepo.fetchEjercicios();
+    final ejercicioRepo = CronometroRepository();
+    final listaEjercicios = await ejercicioRepo.fetchCronometro();
 
     final filtered =
         listaEjercicios.where((e) => e.nombre == widget.exerciseName).toList();

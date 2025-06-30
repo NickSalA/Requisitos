@@ -231,7 +231,7 @@ bool isPoseSelectedCorrect(List<List<double>> k, String selectedPose,
       return isTreePose(k, debug: debug);
     case 'warrior':
       return isWarriorPose(k, debug: debug);
-    case 'cobra':
+    case 'goddess':
       return isGoddessPose(k, debug: debug);
     case 'downdog':
       return isChairPose(k, debug: debug);
@@ -280,8 +280,8 @@ String getFeedback(String poseClass, List<List<double>> k) {
       return getTreeFeedback(k);
     case 'warrior':
       return getWarriorFeedback(k);
-    case 'cobra':
-      return '¡Excelente Cobra!';
+    case 'goddess':
+      return '¡Excelente Goddess!';
     case 'downdog':
       return '¡Buen downdog!';
     default:

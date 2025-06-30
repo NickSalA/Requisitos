@@ -1,163 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import '../model/modo_cronometro.dart';
 
-class CronometroDetailScreen extends StatefulWidget {
-  final ModoCronometro cronometro;
-
+class CronometroDetailScreen extends StatelessWidget {
   const CronometroDetailScreen({super.key, required this.cronometro});
 
-  @override
-  State<CronometroDetailScreen> createState() => _EjercicioDetailScreenState();
-}
-
-class _EjercicioDetailScreenState extends State<CronometroDetailScreen> {
-  final TextEditingController _seriesController = TextEditingController();
-  final TextEditingController _repeticionesController = TextEditingController();
-  final TextEditingController _descansoController = TextEditingController();
-
-  @override
-  void dispose() {
-    _seriesController.dispose();
-    _repeticionesController.dispose();
-    _descansoController.dispose();
-    super.dispose();
-  }
+  final ModoCronometro cronometro;
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('Debug – posesPath contiene: ${cronometro.posesPath}');
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(180),
-        child: AppBar(
-          automaticallyImplyLeading: true,
-          backgroundColor: const Color(0xFFA9A8F2),
-          elevation: 0,
-          centerTitle: true,
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(widget.ejercicio.imagenPath, height: 80),
-                const SizedBox(height: 10),
-                Text(
-                  widget.ejercicio.nombre,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFA9A8F2),
+        elevation: 0,
+        title: Text(
+          cronometro.nombre.trim(),
+          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildInputField("Series:", _seriesController),
-            const SizedBox(height: 20),
-            _buildInputField("Repeticiones:", _repeticionesController),
-            const SizedBox(height: 20),
-            _buildInputField("Descanso (segundos):", _descansoController),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () {
-                final series = _seriesController.text;
-                final repeticiones = _repeticionesController.text;
-                final descanso = _descansoController.text;
+            // Descripción
+            Text(
+              cronometro.descripcion,
+              style: GoogleFonts.poppins(fontSize: 16),
+              textAlign: TextAlign.justify,
+            ),
+            const SizedBox(height: 24),
 
-                if (series.isEmpty ||
-                    repeticiones.isEmpty ||
-                    descanso.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Por favor, completa todos los campos.")),
-                  );
-                  return;
-                }
-
-                final seriesNum = int.tryParse(series) ?? 1;
-                final repeticionesNum = int.tryParse(repeticiones) ?? 1;
-                final descansoNum = int.tryParse(descanso) ?? 30;
-
-                setState(() {
-                  widget.ejercicio.series = seriesNum;
-                  widget.ejercicio.repeticiones = repeticionesNum;
-                  widget.ejercicio.descanso = descansoNum;
-                });
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChangeNotifierProvider(
-                      create: (_) => EjercicioSessionViewModel(
-                        repeticionesPorSerie: repeticionesNum,
-                        totalSeries: seriesNum,
-                        descansoSegundos: descansoNum,
-                      ),
-                      child: EjercicioSesionScreen(
-                        nombreEjercicio: widget.ejercicio.nombre,
-                      ),
-                    ),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFA9A8F2),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+            // Cuadrícula 2x2 con las cuatro poses
+            Expanded(
+              child: GridView.builder(
+                itemCount: cronometro.posesPath.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
                 ),
-              ),
-              child: Text(
-                '¡Listo!',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                itemBuilder: (_, i) => ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    cronometro.posesPath[i],
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInputField(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFFF0F0F0),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

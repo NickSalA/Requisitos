@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../modelView/cronometro_provider.dart';
 import 'sesion_cronometro_screen.dart'; // Esta será la pantalla que usa cámara
+import 'package:fittrack/modelView/cronometro_view_model.dart';
 
 class SeleccionCronometroScreen extends StatefulWidget {
   const SeleccionCronometroScreen({super.key});
@@ -126,8 +127,17 @@ class _SeleccionYogaScreenState extends State<SeleccionCronometroScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              SesionCronometroScreen(), // a implementar
+                          builder: (_) => ChangeNotifierProvider(
+                            create: (_) => PoseCronometroSessionViewModel(
+                              sesion: context
+                                  .read<CronoometroSessionViewModel>() // aquí
+                                  .selectedCronometro!, // tu misma sesión con posesPath
+                              tiempoObjetivo:
+                                  tiempo, // el valor que acaba de ingresar
+                            ),
+                            builder: (context, _) =>
+                                const SesionCronometroScreen(),
+                          ),
                         ),
                       );
                     } else {
