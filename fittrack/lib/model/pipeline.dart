@@ -62,7 +62,7 @@ class PosePipelineHelper {
       final keypoints = List<List<double>>.generate(
           17, (i) => List<double>.from(keypointsOutput[0][0][i]));
       debugPrint('Keypoints con score: ${keypoints.map((k) => k[2]).toList()}');
-      final confiables = keypoints.where((k) => k[2] > 0.4).toList();
+      final confiables = keypoints.where((k) => k[2] > 0.35).toList();
       if (confiables.length < 12) {
         return PoseClassificationResult(
           keypoints: keypoints,

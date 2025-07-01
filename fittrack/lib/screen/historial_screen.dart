@@ -20,11 +20,7 @@ class HistorialScreen extends StatelessWidget {
         'tipo': 'yoga'
       },
       {'nombre': 'tree', 'imagen': 'assets/icons/arbol.png', 'tipo': 'yoga'},
-      {
-        'nombre': 'downdog',
-        'imagen': 'assets/icons/downdog.png',
-        'tipo': 'yoga'
-      },
+      {'nombre': 'chair', 'imagen': 'assets/icons/chair.png', 'tipo': 'yoga'},
       {
         'nombre': 'Raices y equilibrio',
         'imagen': 'assets/icons/sesion_1.png',

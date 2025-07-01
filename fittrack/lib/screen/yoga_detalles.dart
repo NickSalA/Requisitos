@@ -93,7 +93,7 @@ class YogaDetailScreen extends StatelessWidget {
         return 'La pose del árbol desarrolla el equilibrio, la coordinación y la fuerza en las piernas. También promueve la concentración y la calma interior.';
       case 'warrior':
         return 'La pose del guerrero fortalece piernas y brazos, aumenta la resistencia y mejora la postura. Es ideal para desarrollar confianza y enfoque.';
-      case 'downdog':
+      case 'chair':
         return 'La postura del perro boca abajo estira y fortalece todo el cuerpo. Calma la mente y mejora la circulación. Es una de las poses más usadas para relajación.';
       default:
         return 'Esta pose de yoga aporta múltiples beneficios físicos y mentales, ayudando a mejorar tu bienestar general.';
