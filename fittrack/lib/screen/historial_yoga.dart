@@ -15,6 +15,8 @@ class HistorialYogaScreen extends StatefulWidget {
 
 class _HistorialYogaScreenState extends State<HistorialYogaScreen> {
   late Future<List<Yoga>> _yogaDataFuture;
+  DateTime? _selectedDate;
+  final TextEditingController _dateController = TextEditingController();
 
   @override
   void initState() {
@@ -160,23 +162,27 @@ class _HistorialYogaScreenState extends State<HistorialYogaScreen> {
     );
   }
 
-  Widget _buildContent(BuildContext context, List<Yoga> yogaData) {
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-        _buildTitle(),
-        const SizedBox(height: 30),
-        Expanded(
-          // Añadido Expanded aquí
-          child: SingleChildScrollView(
-            // Envuelve la tabla en un ScrollView
-            child: _buildHistoryTable(yogaData),
-          ),
+ Widget _buildContent(BuildContext context, List<Yoga> yogaData) {
+  final filteredData = _filterByDate(yogaData);
+  
+  return Column(
+    children: [
+      const SizedBox(height: 20),
+      _buildTitle(),
+      const SizedBox(height: 35),
+      _buildDateFilter(context),
+      const SizedBox(height: 20),
+      Expanded(
+        child: SingleChildScrollView(
+          child: filteredData.isEmpty
+              ? _buildNoResultsForDate(context)
+              : _buildHistoryTable(filteredData),
         ),
-        _buildBackButton(context),
-      ],
-    );
-  }
+      ),
+      _buildBackButton(context),
+    ],
+  );
+}
 
   Widget _buildTitle() {
     return Text(
@@ -325,4 +331,136 @@ class _HistorialYogaScreenState extends State<HistorialYogaScreen> {
       ),
     );
   }
+
+  List<Yoga> _filterByDate(List<Yoga> data) {
+  if (_selectedDate == null) return data;
+
+  return data.where((item) {
+    return item.fechaCreacion.year == _selectedDate!.year &&
+           item.fechaCreacion.month == _selectedDate!.month &&
+           item.fechaCreacion.day == _selectedDate!.day;
+  }).toList();
+}
+
+Widget _buildDateFilter(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _dateController,
+            decoration: InputDecoration(
+              hintText: 'Filtrar por fecha (dd/mm/aaaa)',
+              hintStyle: GoogleFonts.poppins(fontSize: 14),
+              prefixIcon: const Icon(Icons.calendar_today, size: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            readOnly: true,
+            onTap: () => _selectDate(context),
+          ),
+        ),
+        const SizedBox(width: 8),
+        if (_selectedDate != null)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.clear, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _selectedDate = null;
+                    _dateController.clear();
+                  });
+                },
+              ),
+              const SizedBox(width: 4),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.list, color: Color(0xFFA9A8F2)),
+                  onPressed: () {
+                    setState(() {
+                      _selectedDate = null;
+                      _dateController.clear();
+                    });
+                  },
+                  tooltip: 'Mostrar todos los registros',
+                ),
+              ),
+            ],
+          ),
+      ],
+    ),
+  );
+}
+
+Future<void> _selectDate(BuildContext context) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2000),
+    lastDate: DateTime.now(),
+  );
+  
+  if (picked != null) {
+    setState(() {
+      _selectedDate = picked;
+      _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
+    });
+  }
+}
+Widget _buildNoResultsForDate(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.search_off, size: 50, color: Colors.grey),
+          const SizedBox(height: 15),
+          Text(
+            'No hay registros para la fecha seleccionada',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          if (_selectedDate != null)
+            Text(
+              DateFormat('dd/MM/yyyy').format(_selectedDate!),
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}
 }
