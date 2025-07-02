@@ -170,17 +170,16 @@ bool isChairPose(List<List<double>> k, {bool debug = false}) {
   final rWrist = k[Keypoint.rightWrist.index];
 
   // ➊ Pies casi juntos
-  final feetTogether = (lAnkle[0] - rAnkle[0]).abs() < 0.4;
+  final feetTogether = (lAnkle[0] - rAnkle[0]).abs() < 0.3;
 
   // ➋ Rodillas por delante de las caderas (flexión ≥ ≈90°)
-  final kneesBent = lKnee[1] > lHip[1] + 0.25 && rKnee[1] > rHip[1] + 0.25;
-
+  final kneesBent = (lHip[1] - lKnee[1]) > 0.10 && (rHip[1] - rKnee[1]) > 0.1;
   // ➌ Brazos estirados por encima de la cabeza (línea hombro-muñeca)
   final armsUp = lWrist[1] < lShoulder[1] - 0.1 &&
       rWrist[1] < rShoulder[1] - 0.1 &&
       // codos casi rectos
-      (lElbow[1] - lWrist[1]).abs() < 0.2 &&
-      (rElbow[1] - rWrist[1]).abs() < 0.2;
+      (lElbow[1] - lWrist[1]).abs() < 0.05 &&
+      (rElbow[1] - rWrist[1]).abs() < 0.05;
 
   // ➍ Inclinación del tronco : hombros algo delante de caderas
   final torsoForward =
@@ -190,8 +189,13 @@ bool isChairPose(List<List<double>> k, {bool debug = false}) {
   logMetric('kneesBent', kneesBent ? 1 : 0, debug: debug);
   logMetric('armsUp', armsUp ? 1 : 0, debug: debug);
   logMetric('torsoFwd', torsoForward ? 1 : 0, debug: debug);
-
-  return feetTogether && kneesBent && armsUp && torsoForward;
+  final okparts = [
+    feetTogether,
+    kneesBent,
+    armsUp,
+    torsoForward,
+  ].where((v) => v);
+  return okparts.length >= 2; // al menos 3 de 4
 }
 
 // Postura base "sin pose" (de pie, brazos abajo)

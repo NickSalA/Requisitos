@@ -23,6 +23,7 @@ class PoseSessionViewModel extends ChangeNotifier {
   List<List<double>>? _keypoints;
   Timer? _mainTimer;
   Timer? _poseValidationTimer;
+  // ignore: unused_field
   Timer? _tiempoTimer;
   int _tiempoCorrecto = 0;
   int _tiempoIncorrecto = 0;
@@ -135,7 +136,7 @@ class PoseSessionViewModel extends ChangeNotifier {
 
   Future<void> _guardarEnHistorial(Yoga yoga) async {
     final repo = YogaRepository();
-  await repo.saveYoga([yoga]);
+    await repo.saveYoga([yoga]);
   }
 
   @override

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:camera/camera.dart';
 import 'package:fittrack/utils/image_utils.dart';
 import 'package:flutter/material.dart';
